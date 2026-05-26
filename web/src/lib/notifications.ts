@@ -21,3 +21,17 @@ export async function createUserNotification(input: CreateUserNotificationInput)
     },
   });
 }
+
+export async function notifyAdmins(input: { title: string; content: string; type?: NotificationType; link?: string | null; }) {
+  const admins = await prisma.user.findMany({ where: { role: 'ADMIN' } });
+  const notifications = admins.map(admin => ({
+    userId: admin.id,
+    title: input.title,
+    content: input.content,
+    type: input.type ?? 'SYSTEM',
+    link: input.link ?? null,
+  }));
+  if (notifications.length > 0) {
+    await prisma.notification.createMany({ data: notifications });
+  }
+}

@@ -116,7 +116,7 @@ export default function HandoversPage() {
 
   return (
     <DashboardLayout activeItemId="handovers" pageTitle="Quản Lý Bàn Giao & Bằng Chứng">
-      <div className="space-y-6">
+      <div className="space-y-3">
         {/* Header Actions */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
@@ -133,7 +133,7 @@ export default function HandoversPage() {
             {['ALL', 'SUCCESS', 'DISPUTED', 'MEETING', 'DELIVERING'].map((status) => (
               <button 
                 key={status}
-                className="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-blue-500/50 transition-all"
+                className="px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-blue-500/50 transition-all"
               >
                 {status === 'ALL' ? 'Tất cả' : STATUS_LABELS[status] || status}
               </button>
@@ -158,11 +158,11 @@ export default function HandoversPage() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">#{handover.id.slice(-8).toUpperCase()}</span>
-                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border ${STATUS_COLORS[handover.status] || 'bg-zinc-100 text-zinc-600'}`}>
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-medium border ${STATUS_COLORS[handover.status] || 'bg-zinc-100 text-zinc-600'}`}>
                           {STATUS_LABELS[handover.status] || handover.status}
                         </span>
                       </div>
-                      <h3 className="font-bold text-zinc-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors">{handover.productName}</h3>
+                      <h3 className="font-medium text-zinc-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors">{handover.productName}</h3>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500">
                         <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> Bán: {handover.sellerName}</span>
                         <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> Mua: {handover.buyerName}</span>
@@ -173,7 +173,7 @@ export default function HandoversPage() {
                   <div className="flex items-center gap-3 md:self-center shrink-0">
                     <div className="text-right hidden md:block mr-4">
                       <div className="text-sm font-black text-zinc-900 dark:text-white">{handover.finalPrice.toLocaleString()}đ</div>
-                      <div className="text-[10px] text-zinc-500 uppercase font-bold tracking-tighter">{handover.evidences.length} bằng chứng</div>
+                      <div className="text-[10px] text-zinc-500 uppercase font-medium tracking-tighter">{handover.evidences.length} bằng chứng</div>
                     </div>
                     <button className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all">
                       <ChevronRight className="w-5 h-5" />
@@ -187,7 +187,7 @@ export default function HandoversPage() {
               <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-800 rounded-3xl flex items-center justify-center text-zinc-400 mx-auto mb-6">
                 <FileBadge className="w-10 h-10" />
               </div>
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Chưa có dữ liệu bàn giao</h3>
+              <h3 className="text-lg font-medium text-zinc-900 dark:text-white mb-2">Chưa có dữ liệu bàn giao</h3>
               <p className="text-zinc-500 text-sm max-w-xs mx-auto">Hệ thống chưa ghi nhận bất kỳ đơn hàng hoặc bằng chứng bàn giao nào phù hợp.</p>
             </div>
           )}
@@ -213,7 +213,7 @@ export default function HandoversPage() {
                   </button>
                   <div>
                     <h2 className="font-black text-lg text-zinc-900 dark:text-white leading-tight">Chi tiết bàn giao</h2>
-                    <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Mã đơn: #{selectedHandover.id.toUpperCase()}</p>
+                    <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest mt-0.5">Mã đơn: #{selectedHandover.id.toUpperCase()}</p>
                   </div>
                 </div>
                 <div className={`px-3 py-1 rounded-xl text-[10px] font-black border uppercase tracking-widest ${STATUS_COLORS[selectedHandover.status] || 'bg-zinc-100 text-zinc-600'}`}>
@@ -230,7 +230,7 @@ export default function HandoversPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-bold text-xl text-zinc-900 dark:text-white">{selectedHandover.productName}</h4>
+                        <h4 className="font-medium text-xl text-zinc-900 dark:text-white">{selectedHandover.productName}</h4>
                         <p className="text-sm text-blue-600 font-black mt-1">{selectedHandover.finalPrice.toLocaleString()}đ</p>
                       </div>
                       <button className="text-zinc-400 hover:text-blue-600 transition-colors">
@@ -240,11 +240,11 @@ export default function HandoversPage() {
                     <div className="grid grid-cols-2 gap-4 pt-4">
                       <div className="p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
                         <p className="text-[10px] font-black text-zinc-400 uppercase mb-1">Người bán</p>
-                        <p className="text-sm font-bold text-zinc-900 dark:text-white">{selectedHandover.sellerName}</p>
+                        <p className="text-sm font-medium text-zinc-900 dark:text-white">{selectedHandover.sellerName}</p>
                       </div>
                       <div className="p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
                         <p className="text-[10px] font-black text-zinc-400 uppercase mb-1">Người mua</p>
-                        <p className="text-sm font-bold text-zinc-900 dark:text-white">{selectedHandover.buyerName}</p>
+                        <p className="text-sm font-medium text-zinc-900 dark:text-white">{selectedHandover.buyerName}</p>
                       </div>
                     </div>
                   </div>
@@ -273,7 +273,7 @@ export default function HandoversPage() {
                             </div>
                           </div>
                           <div className="mt-3 px-2">
-                            <p className="text-xs font-bold text-zinc-900 dark:text-white truncate">{evidence.caption || (evidence.type === 'PICKUP_PROOF' ? 'Ảnh bàn giao trực tiếp' : 'Ảnh xác nhận')}</p>
+                            <p className="text-xs font-medium text-zinc-900 dark:text-white truncate">{evidence.caption || (evidence.type === 'PICKUP_PROOF' ? 'Ảnh bàn giao trực tiếp' : 'Ảnh xác nhận')}</p>
                             <p className="text-[10px] text-zinc-500 mt-1">{new Date(evidence.createdAt).toLocaleString('vi-VN')}</p>
                           </div>
                         </div>
@@ -303,7 +303,7 @@ export default function HandoversPage() {
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tighter">{STATUS_LABELS[log.status] || log.status}</span>
-                            <span className="text-[10px] text-zinc-400 font-bold">{new Date(log.createdAt).toLocaleString('vi-VN')}</span>
+                            <span className="text-[10px] text-zinc-400 font-medium">{new Date(log.createdAt).toLocaleString('vi-VN')}</span>
                           </div>
                           {log.note && <p className="text-xs text-zinc-500 bg-zinc-50 dark:bg-zinc-900 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800 mt-2">{log.note}</p>}
                         </div>
@@ -319,7 +319,7 @@ export default function HandoversPage() {
                       <AlertCircle className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-rose-700 dark:text-rose-400 text-sm">Đang có tranh chấp!</h4>
+                      <h4 className="font-medium text-rose-700 dark:text-rose-400 text-sm">Đang có tranh chấp!</h4>
                       <p className="text-xs text-rose-600/70 dark:text-rose-400/60 mt-0.5 font-medium leading-relaxed">Đơn hàng này đang được gắn cờ tranh chấp. Quản trị viên cần kiểm tra kỹ bằng chứng trước khi xử lý.</p>
                     </div>
                     <button className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black shadow-md transition-all active:scale-95">

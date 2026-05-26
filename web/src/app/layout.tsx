@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import type { CSSProperties } from "react";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin", "vietnamese"], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: "StuRelief - Campus Exchange",
@@ -15,13 +17,8 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className="h-full antialiased"
+      className={`h-full antialiased ${inter.variable}`}
       suppressHydrationWarning
-      style={
-        {
-          '--font-sans': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        } as CSSProperties
-      }
     >
       <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
         {children}

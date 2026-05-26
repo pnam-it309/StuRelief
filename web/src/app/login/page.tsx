@@ -166,7 +166,7 @@ export default function LoginPage() {
               <AlertCircle className="w-5 h-5 text-rose-500" />
             </div>
           )}
-          <span className="font-bold text-sm">{feedback.message}</span>
+          <span className="font-medium text-sm">{feedback.message}</span>
         </div>
       )}
 
@@ -192,13 +192,13 @@ export default function LoginPage() {
             <div className="grid grid-cols-2 gap-4">
               {/* Stat 1 */}
               <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold tracking-wider opacity-60">Sản phẩm hiện có</span>
+                <span className="text-[10px] uppercase font-medium tracking-wider opacity-60">Sản phẩm hiện có</span>
                 <div className="text-3xl font-extrabold mt-1">19+</div>
                 <p className="text-[11px] opacity-70 mt-1">Tin rao đang hoạt động</p>
               </div>
               {/* Stat 2 */}
               <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold tracking-wider opacity-60">Độ tin cậy</span>
+                <span className="text-[10px] uppercase font-medium tracking-wider opacity-60">Độ tin cậy</span>
                 <div className="text-3xl font-extrabold mt-1">100%</div>
                 <p className="text-[11px] opacity-70 mt-1">Xác thực mã sinh viên</p>
               </div>
@@ -206,11 +206,11 @@ export default function LoginPage() {
             
             {/* Horizontal Banner Card */}
             <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold text-lg">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-medium text-lg">
                 🤝
               </div>
               <div>
-                <h4 className="font-bold text-sm">Giao dịch an toàn & tin cậy</h4>
+                <h4 className="font-medium text-sm">Giao dịch an toàn & tin cậy</h4>
                 <p className="text-xs opacity-75 mt-0.5">Hỗ trợ gặp trực tiếp tại ký túc xá, giảng đường.</p>
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function LoginPage() {
             {/* FULL NAME (Only for Register) */}
             {isRegister && (
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider">Họ tên sinh viên</label>
+                <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 uppercase tracking-wider">Họ tên sinh viên</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
                     <User className="w-5 h-5" />
@@ -274,7 +274,7 @@ export default function LoginPage() {
 
             {/* EMAIL */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider">Địa chỉ Email</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 uppercase tracking-wider">Địa chỉ Email</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
                   <Mail className="w-5 h-5" />
@@ -293,7 +293,7 @@ export default function LoginPage() {
             {/* STUDENT CODE (Only for Register) */}
             {isRegister && (
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider">Mã sinh viên (Không bắt buộc)</label>
+                <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 uppercase tracking-wider">Mã sinh viên (Không bắt buộc)</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
                     <GraduationCap className="w-5 h-5" />
@@ -312,7 +312,7 @@ export default function LoginPage() {
             {/* PASSWORD */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider">Mật khẩu</label>
+                <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 uppercase tracking-wider">Mật khẩu</label>
                 {!isRegister && (
                   <button 
                     type="button" 
@@ -349,7 +349,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-4 rounded-2xl font-bold text-sm tracking-wide shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`w-full py-4 rounded-2xl font-medium text-sm tracking-wide shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 loading ? 'opacity-80 cursor-wait' : ''
               }`}
             >
@@ -377,7 +377,7 @@ export default function LoginPage() {
               onClick={() => {
                 window.location.href = '/api/auth/google?returnTo=/';
               }}
-              className="w-full py-3.5 rounded-2xl font-bold text-xs tracking-wide bg-white dark:bg-zinc-800/30 hover:bg-slate-50 dark:hover:bg-zinc-800/60 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 transition-all flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer"
+              className="w-full py-3.5 rounded-2xl font-medium text-xs tracking-wide bg-white dark:bg-zinc-800/30 hover:bg-slate-50 dark:hover:bg-zinc-800/60 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 transition-all flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer"
             >
               {/* Google Colored Icon */}
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -400,14 +400,14 @@ export default function LoginPage() {
                 setIsRegister(!isRegister);
                 setFeedback(null);
               }}
-              className="ml-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 transition-colors"
+              className="ml-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 transition-colors"
             >
               {isRegister ? 'Đăng nhập ngay' : 'Đăng ký ngay'}
             </button>
           </div>
 
           <div className="text-center mt-4">
-            <Link href={APP_ROUTES.ADMIN.LOGIN} className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 hover:underline">
+            <Link href={APP_ROUTES.ADMIN.LOGIN} className="text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 hover:underline">
               Dành cho quản trị viên
             </Link>
           </div>

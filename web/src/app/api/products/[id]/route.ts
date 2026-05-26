@@ -7,6 +7,7 @@ import { DeleteItemUseCase } from '@/use-cases/items/DeleteItemUseCase';
 import { verifyToken } from '@/lib/jwt';
 import { env } from '@/infrastructure/config/env';
 import prisma from '@/lib/prisma';
+import { createUserNotification, notifyAdmins } from '@/lib/notifications';
 
 const itemRepository = new PrismaItemRepository();
 
@@ -70,6 +71,30 @@ export async function PUT(
     const useCase = new UpdateItemUseCase(itemRepository);
     const updatedItem = await useCase.execute(id, body);
 
+    // Notify if student updated the post
+    if (token) {
+      const payload = verifyToken(token, env.JWT_SECRET);
+      if (payload && payload.role !== 'ADMIN') {
+        // Student gets notified
+        await createUserNotification({
+          userId: payload.id,
+          title: 'Cập nhật bài đăng',
+          content: `Bài đăng "${updatedItem.name}" đã được cập nhật và đang chờ admin duyệt lại.`,
+          type: 'SYSTEM',
+          link: `/products/${updatedItem.id}`,
+        });
+        
+        // Admins get notified
+        const user = await prisma.user.findUnique({ where: { id: payload.id } });
+        await notifyAdmins({
+          title: 'Bài đăng được cập nhật',
+          content: `${user?.fullName || 'Một sinh viên'} vừa cập nhật bài đăng "${updatedItem.name}" và đang chờ duyệt lại.`,
+          type: 'SYSTEM',
+          link: `/admin/posts`,
+        });
+      }
+    }
+
     return NextResponse.json(updatedItem);
   } catch (error: any) {
     return NextResponse.json(
@@ -105,8 +130,24 @@ export async function DELETE(
       }
     }
 
+    // Fetch product before deleting to get sellerId
+    const productToDelete = await prisma.product.findUnique({ where: { id } });
+
     const useCase = new DeleteItemUseCase(itemRepository);
     await useCase.execute(id);
+
+    // Notify if admin deletes student's post
+    if (token && productToDelete) {
+      const payload = verifyToken(token, env.JWT_SECRET);
+      if (payload && payload.role === 'ADMIN' && productToDelete.sellerId !== payload.id) {
+        await createUserNotification({
+          userId: productToDelete.sellerId,
+          title: 'Bài đăng đã bị xóa',
+          content: `Bài đăng "${productToDelete.name}" của bạn đã bị quản trị viên xóa do vi phạm chính sách hoặc không phù hợp.`,
+          type: 'ALARM',
+        });
+      }
+    }
 
     return NextResponse.json({ message: 'Product deleted successfully' });
   } catch (error: any) {

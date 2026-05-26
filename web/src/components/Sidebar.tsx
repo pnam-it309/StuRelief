@@ -122,7 +122,7 @@ export default function Sidebar({
               />
               {!isCollapsed && (
                 <div className="flex flex-col min-w-0 animate-fade-in">
-                  <span className="text-[13px] font-bold truncate leading-snug">
+                  <span className="text-[13px] font-medium truncate leading-snug">
                     {item.label}
                   </span>
                 </div>

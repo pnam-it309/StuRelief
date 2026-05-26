@@ -16,7 +16,7 @@ export default function DashboardFooter() {
               <HeartHandshake className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-zinc-950 dark:text-white">StuRelief</p>
+              <p className="text-sm font-medium text-zinc-950 dark:text-white">StuRelief</p>
               <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Chợ đồ cũ sinh viên</p>
             </div>
           </div>
@@ -27,7 +27,7 @@ export default function DashboardFooter() {
         </div>
 
         <div className="space-y-4">
-          <p className="text-sm font-bold text-zinc-950 dark:text-white">Lối tắt</p>
+          <p className="text-sm font-medium text-zinc-950 dark:text-white">Lối tắt</p>
           <div className="flex flex-col gap-2">
             <Link className="text-sm text-zinc-600 hover:text-blue-600 dark:text-zinc-300 dark:hover:text-blue-400" href={APP_ROUTES.HOME}>
               Chợ đồ cũ
@@ -45,7 +45,7 @@ export default function DashboardFooter() {
         </div>
 
         <div className="space-y-4">
-          <p className="text-sm font-bold text-zinc-950 dark:text-white">Hỗ trợ</p>
+          <p className="text-sm font-medium text-zinc-950 dark:text-white">Hỗ trợ</p>
           <div className="space-y-3 text-sm text-zinc-600 dark:text-zinc-300">
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 shrink-0 text-cyan-500" />

@@ -130,7 +130,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
 
         <button
           onClick={onOpenCreateModal}
-          className="flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-blue-500/15 transition-all hover:bg-blue-700"
+          className="flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-medium text-white shadow-md shadow-blue-500/15 transition-all hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" strokeWidth={3} />
           Đăng bán ngay

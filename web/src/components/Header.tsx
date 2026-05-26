@@ -99,7 +99,7 @@ export default function Header() {
                 </div>
                 
                 <div className="hidden sm:flex flex-col items-end">
-                  <span className="text-sm font-bold text-zinc-900 dark:text-white leading-tight">
+                  <span className="text-sm font-medium text-zinc-900 dark:text-white leading-tight">
                     {currentUser.fullName}
                   </span>
                 </div>
@@ -133,7 +133,7 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-bold text-sm px-5 py-2.5 rounded-2xl shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium text-sm px-5 py-2.5 rounded-2xl shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
             >
               <LogIn className="w-4.5 h-4.5" />
               <span>Đăng nhập</span>

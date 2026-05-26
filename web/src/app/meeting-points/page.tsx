@@ -253,7 +253,7 @@ export default function MeetingPointsPage() {
                       <MapPin className="h-12 w-12 text-white/90" />
                     </div>
                   )}
-                  <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold text-zinc-900">
+                  <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-medium text-zinc-900">
                     {point.isSafeZone ? 'An toàn' : 'Công khai'}
                   </div>
                 </div>
@@ -261,7 +261,7 @@ export default function MeetingPointsPage() {
                 <div className="space-y-4 p-5">
                   <div>
                     <div className="text-[11px] font-semibold text-zinc-400">{point.universityName}</div>
-                    <h3 className="mt-1 text-base font-bold text-zinc-950 dark:text-white">{point.name}</h3>
+                    <h3 className="mt-1 text-base font-medium text-zinc-950 dark:text-white">{point.name}</h3>
                     <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{point.campusName}</div>
                   </div>
 
@@ -313,7 +313,7 @@ export default function MeetingPointsPage() {
           <aside className="space-y-4">
             <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-900">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-zinc-950 dark:text-white">Điểm đã chọn</h3>
+                <h3 className="text-sm font-medium text-zinc-950 dark:text-white">Điểm đã chọn</h3>
                 <Sparkles className="h-4 w-4 text-blue-500" />
               </div>
 
@@ -321,7 +321,7 @@ export default function MeetingPointsPage() {
                 <div className="mt-4 space-y-4">
                   <div className="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-950">
                     <div className="text-[11px] font-semibold text-zinc-400">{selectedPoint.universityName}</div>
-                    <div className="mt-1 text-base font-bold text-zinc-950 dark:text-white">{selectedPoint.name}</div>
+                    <div className="mt-1 text-base font-medium text-zinc-950 dark:text-white">{selectedPoint.name}</div>
                     <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{selectedPoint.campusName}</div>
                   </div>
                   <div className="text-sm leading-6 text-zinc-600 dark:text-zinc-300">
@@ -345,7 +345,7 @@ export default function MeetingPointsPage() {
             <div className="rounded-3xl border border-blue-500/15 bg-blue-50 p-5 shadow-sm dark:border-blue-500/20 dark:bg-blue-950/20">
               <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                 <CheckCircle2 className="h-4 w-4" />
-                <h3 className="text-sm font-bold">Gợi ý</h3>
+                <h3 className="text-sm font-medium">Gợi ý</h3>
               </div>
               <div className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
                 Ưu tiên chọn điểm có camera hoặc khu công khai, và mở bản đồ trước khi hẹn gặp.

@@ -78,7 +78,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="p-3 bg-white/90 hover:bg-white text-zinc-800 rounded-full font-bold text-xs shadow-md transition-all flex items-center gap-1.5 hover:scale-105"
+              className="p-3 bg-white/90 hover:bg-white text-zinc-800 rounded-full font-medium text-xs shadow-md transition-all flex items-center gap-1.5 hover:scale-105"
             >
               <Upload className="w-4 h-4" />
               Thay ảnh khác
@@ -89,7 +89,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 e.stopPropagation();
                 onChange('');
               }}
-              className="p-3 bg-red-600/90 hover:bg-red-600 text-white rounded-full font-bold text-xs shadow-md transition-all flex items-center gap-1.5 hover:scale-105"
+              className="p-3 bg-red-600/90 hover:bg-red-600 text-white rounded-full font-medium text-xs shadow-md transition-all flex items-center gap-1.5 hover:scale-105"
             >
               <Trash2 className="w-4 h-4" />
               Xóa ảnh
@@ -123,7 +123,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               <div className="p-4 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm mb-2 border border-zinc-100 dark:border-zinc-700 group-hover:scale-110 transition-transform">
                 <ImageIcon className="w-8 h-8 text-zinc-400 dark:text-zinc-300" />
               </div>
-              <span className="text-sm font-bold text-zinc-850 dark:text-zinc-200">Kéo thả ảnh hoặc click để tải lên</span>
+              <span className="text-sm font-medium text-zinc-850 dark:text-zinc-200">Kéo thả ảnh hoặc click để tải lên</span>
             </div>
           )}
         </div>

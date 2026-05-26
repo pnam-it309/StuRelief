@@ -44,7 +44,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
           {product.isQuickSell && (
             <div className="absolute top-3 left-3">
-              <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider animate-pulse">
+              <span className="bg-red-500 text-white text-[10px] font-medium px-2 py-1 rounded-full uppercase tracking-wider animate-pulse">
                 Thanh lý gấp
               </span>
             </div>
@@ -52,16 +52,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
           {product.status !== 'AVAILABLE' && (
             <div className="absolute top-3 left-3">
-              <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider ${PRODUCT_STATUS_CLASSES[product.status]}`}>
+              <span className={`text-[10px] font-medium px-2 py-1 rounded-full uppercase tracking-wider ${PRODUCT_STATUS_CLASSES[product.status]}`}>
                 {PRODUCT_STATUS_LABELS[product.status]}
               </span>
             </div>
           )}
 
-          <div className="absolute bottom-3 right-3">
+          <div className="absolute bottom-3 right-3 flex flex-col gap-1 items-end">
             <span className="bg-white/80 dark:bg-black/60 backdrop-blur-md text-zinc-800 dark:text-zinc-200 text-xs px-2 py-1 rounded-lg">
               {product.category}
             </span>
+            {product.sellerName && (
+              <span className="bg-blue-600/90 backdrop-blur-md text-white text-[10px] font-medium px-2 py-1 rounded-lg">
+                Người đăng: {product.sellerName}
+              </span>
+            )}
           </div>
         </div>
 
@@ -69,7 +74,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <h3 className="mb-1 line-clamp-1 text-sm font-semibold text-zinc-900 transition-colors group-hover:text-blue-600 dark:text-zinc-100">
             {product.name}
           </h3>
-          <p className="text-base font-bold text-blue-600 dark:text-blue-400">
+          <p className="text-base font-medium text-blue-600 dark:text-blue-400">
             {formattedPrice}
           </p>
           {product.description && (

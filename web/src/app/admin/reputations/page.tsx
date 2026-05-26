@@ -385,7 +385,7 @@ export default function ReputationsPage() {
 
   return (
     <DashboardLayout activeItemId="reputations" pageTitle="Uy Tín & Đánh Giá Sinh Viên">
-      <div className="space-y-6">
+      <div className="space-y-3">
         {feedback && (
           <div className={`fixed right-5 top-20 z-50 flex items-center gap-2 rounded-2xl border px-5 py-3 shadow-xl md:top-24 ${
             feedback.type === 'success'
@@ -397,59 +397,50 @@ export default function ReputationsPage() {
         )}
         
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={() => router.push(APP_ROUTES.ADMIN.DASHBOARD)} 
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại Dashboard Tổng Quan</span>
-          </button>
-        </div>
-
+        
         {/* Top Analytics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           
           {/* Card 1: Avg score */}
-          <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800/50 flex items-center justify-between shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-sm flex items-center justify-between group hover:border-blue-500/30 transition-all duration-300">
             <div className="space-y-2">
-              <span className="text-[10px] font-bold text-zinc-950 dark:text-zinc-100 tracking-tight block">Uy tín trung bình</span>
-              <span className="text-2xl font-black tracking-tight">{averageReputation}</span>
+              <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400 tracking-tight block">Uy tín trung bình</span>
+              <span className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">{averageReputation}</span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-blue-600 shadow-blue-500/10 text-white flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
               <Award className="w-6 h-6" />
             </div>
           </div>
 
           {/* Card 2: Feedback rate */}
-          <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800/50 flex items-center justify-between shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-sm flex items-center justify-between group hover:border-blue-500/30 transition-all duration-300">
             <div className="space-y-2">
-              <span className="text-[10px] font-bold text-zinc-950 dark:text-zinc-100 tracking-tight block">Tỷ lệ hài lòng</span>
-              <span className="text-2xl font-black tracking-tight">{positiveFeedbackRate}%</span>
+              <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400 tracking-tight block">Tỷ lệ hài lòng</span>
+              <span className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">{positiveFeedbackRate}%</span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-              <Star className="w-6 h-6 fill-amber-500" />
+            <div className="w-12 h-12 rounded-2xl bg-amber-500 shadow-amber-500/10 text-white flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+              <Star className="w-6 h-6 fill-white" />
             </div>
           </div>
 
           {/* Card 3: Total reviews */}
-          <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800/50 flex items-center justify-between shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-sm flex items-center justify-between group hover:border-blue-500/30 transition-all duration-300">
             <div className="space-y-2">
-              <span className="text-[10px] font-bold text-zinc-950 dark:text-zinc-100 tracking-tight block">Tổng đánh giá</span>
-              <span className="text-2xl font-black tracking-tight">{feedbacks.length}</span>
+              <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400 tracking-tight block">Tổng đánh giá</span>
+              <span className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">{feedbacks.length}</span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-600 shadow-indigo-500/10 text-white flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
               <MessageSquare className="w-6 h-6" />
             </div>
           </div>
 
           {/* Card 4: Low reputation */}
-          <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800/50 flex items-center justify-between shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-sm flex items-center justify-between group hover:border-blue-500/30 transition-all duration-300">
             <div className="space-y-2">
-              <span className="text-[10px] font-bold text-zinc-950 dark:text-zinc-100 tracking-tight block">Cần lưu ý</span>
-              <span className="text-2xl font-black tracking-tight text-rose-500">{lowReputationCount}</span>
+              <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400 tracking-tight block">Cần lưu ý</span>
+              <span className="text-3xl font-medium tracking-tight text-rose-500">{lowReputationCount}</span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500 shadow-rose-500/10 text-white flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
               <AlertTriangle className="w-6 h-6" />
             </div>
           </div>
@@ -494,13 +485,13 @@ export default function ReputationsPage() {
         {activeTab === 'students' && (
           <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/60 dark:border-zinc-800/50 overflow-hidden shadow-sm">
             <div className="p-6 border-b border-zinc-100 dark:border-zinc-800/40">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Danh sách Điểm Uy tín Sinh viên</h3>
+              <h3 className="text-sm font-medium text-zinc-900 dark:text-white">Danh sách Điểm Uy tín Sinh viên</h3>
             </div>
             
             <div className="p-4 md:p-5 border-b border-zinc-100 dark:border-zinc-800/40 space-y-4">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Trạng thái</span>
+                  <span className="text-[10px] font-medium tracking-tight text-zinc-950 dark:text-zinc-100">Trạng thái</span>
                   <select
                     value={studentStatusFilter}
                     onChange={(e) => setStudentStatusFilter(e.target.value as StudentStatusFilter)}
@@ -513,7 +504,7 @@ export default function ReputationsPage() {
                 </label>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Nhóm điểm</span>
+                  <span className="text-[10px] font-medium tracking-tight text-zinc-950 dark:text-zinc-100">Nhóm điểm</span>
                   <select
                     value={studentScoreFilter}
                     onChange={(e) => setStudentScoreFilter(e.target.value as StudentScoreFilter)}
@@ -528,7 +519,7 @@ export default function ReputationsPage() {
                 </label>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Sắp xếp</span>
+                  <span className="text-[10px] font-medium tracking-tight text-zinc-950 dark:text-zinc-100">Sắp xếp</span>
                   <select
                     value={studentSort}
                     onChange={(e) => setStudentSort(e.target.value as StudentSortOption)}
@@ -544,10 +535,7 @@ export default function ReputationsPage() {
                 </label>
               </div>
 
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[11px] text-zinc-400 font-medium">
-                  Hiển thị {sortedStudents.length === 0 ? 0 : studentStartIndex + 1}-{studentEndIndex} / {sortedStudents.length} sinh viên
-                </p>
+              <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => {
                     setStudentStatusFilter('all');
@@ -566,7 +554,7 @@ export default function ReputationsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-zinc-50 dark:bg-zinc-800/40 text-[10px] text-zinc-950 dark:text-zinc-100 font-bold tracking-tight border-b border-zinc-100 dark:border-zinc-800/50">
+                  <tr className="bg-zinc-50 dark:bg-zinc-800/40 text-[10px] text-zinc-950 dark:text-zinc-100 font-medium tracking-tight border-b border-zinc-100 dark:border-zinc-800/50">
                     <th className="p-4 pl-6">Sinh viên</th>
                     <th className="p-4">Mã số SV</th>
                     <th className="p-4">Trạng thái xác thực</th>
@@ -578,7 +566,7 @@ export default function ReputationsPage() {
                   {paginatedStudents.map(student => (
                     <tr key={student.id} className="hover:bg-zinc-50/40 dark:hover:bg-zinc-800/20 transition-colors">
                       <td className="p-4 pl-6 flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold overflow-hidden">
+                        <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium overflow-hidden">
                           {student.avatarUrl ? (
                             <img src={student.avatarUrl} alt={student.fullName} className="w-full h-full object-cover" />
                           ) : (
@@ -586,13 +574,13 @@ export default function ReputationsPage() {
                           )}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-zinc-900 dark:text-white font-bold">{student.fullName}</span>
+                          <span className="text-zinc-900 dark:text-white font-medium">{student.fullName}</span>
                           <span className="text-[10px] text-zinc-400 font-normal">{student.email}</span>
                         </div>
                       </td>
                       <td className="p-4 text-zinc-500 dark:text-zinc-400 font-mono">{student.studentCode}</td>
                       <td className="p-4">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide uppercase ${
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-medium tracking-wide uppercase ${
                           student.status === 'VERIFIED' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-600'
                         }`}>
                           {student.status === 'VERIFIED' ? 'Đã Xác thực' : 'Chưa Xác thực'}
@@ -647,14 +635,14 @@ export default function ReputationsPage() {
                 <div className="flex items-center gap-1">
                   {studentPaginationItems.map((item, index) =>
                     item === 'ellipsis' ? (
-                      <span key={`student-ellipsis-${index}`} className="px-2 text-zinc-400 text-xs font-bold">
+                      <span key={`student-ellipsis-${index}`} className="px-2 text-zinc-400 text-xs font-medium">
                         ...
                       </span>
                     ) : (
                       <button
                         key={item}
                         onClick={() => setStudentPage(item)}
-                        className={`min-w-9 h-9 px-3 rounded-xl text-xs font-bold transition-colors ${
+                        className={`min-w-9 h-9 px-3 rounded-xl text-xs font-medium transition-colors ${
                           item === currentStudentPage
                             ? 'bg-blue-600 text-white shadow-sm'
                             : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
@@ -684,13 +672,13 @@ export default function ReputationsPage() {
         {activeTab === 'feedbacks' && (
           <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/60 dark:border-zinc-800/50 shadow-sm overflow-hidden animate-fade-in">
             <div className="p-6 border-b border-zinc-100 dark:border-zinc-800/40">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Phản hồi & Feedback</h3>
+              <h3 className="text-sm font-medium text-zinc-900 dark:text-white">Phản hồi & Feedback</h3>
             </div>
 
             <div className="p-4 md:p-5 border-b border-zinc-100 dark:border-zinc-800/40 space-y-4">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Mức đánh giá</span>
+                  <span className="text-[10px] font-medium tracking-tight text-zinc-950 dark:text-zinc-100">Mức đánh giá</span>
                   <select
                     value={feedbackRatingFilter}
                     onChange={(e) => setFeedbackRatingFilter(e.target.value as FeedbackRatingFilter)}
@@ -705,7 +693,7 @@ export default function ReputationsPage() {
                 </label>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Sắp xếp</span>
+                  <span className="text-[10px] font-medium tracking-tight text-zinc-950 dark:text-zinc-100">Sắp xếp</span>
                   <select
                     value={feedbackSort}
                     onChange={(e) => setFeedbackSort(e.target.value as FeedbackSortOption)}
@@ -721,10 +709,7 @@ export default function ReputationsPage() {
                 </label>
               </div>
 
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[11px] text-zinc-400 font-medium">
-                  Hiển thị {sortedFeedbacks.length === 0 ? 0 : feedbackStartIndex + 1}-{feedbackEndIndex} / {sortedFeedbacks.length} phản hồi
-                </p>
+              <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => {
                     setFeedbackRatingFilter('all');
@@ -747,11 +732,11 @@ export default function ReputationsPage() {
                 {/* Header review details */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8.5 h-8.5 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                    <div className="w-8.5 h-8.5 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-xs">
                       {review.reviewerName.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-zinc-950 dark:text-white font-bold text-xs">{review.reviewerName}</span>
+                      <span className="text-zinc-950 dark:text-white font-medium text-xs">{review.reviewerName}</span>
                       <span className="text-[10px] text-zinc-400 font-normal">Người mua đánh giá</span>
                     </div>
                   </div>
@@ -771,7 +756,7 @@ export default function ReputationsPage() {
                 {/* Target Information */}
                 <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/40 pt-3 text-[10px]">
                   <div className="flex flex-col">
-                    <span className="text-zinc-400">Người bán nhận: <strong className="text-zinc-700 dark:text-zinc-300 font-bold">{review.reviewedName}</strong></span>
+                    <span className="text-zinc-400">Người bán nhận: <strong className="text-zinc-700 dark:text-zinc-300 font-medium">{review.reviewedName}</strong></span>
                     <span className="text-zinc-400 mt-0.5">Sản phẩm: <strong className="text-zinc-500 dark:text-zinc-400">{review.productName}</strong></span>
                   </div>
                   <span className="text-zinc-400 font-medium font-mono">{new Date(review.createdAt).toLocaleDateString('vi-VN')}</span>
@@ -805,14 +790,14 @@ export default function ReputationsPage() {
               <div className="flex items-center gap-1">
                 {feedbackPaginationItems.map((item, index) =>
                   item === 'ellipsis' ? (
-                    <span key={`feedback-ellipsis-${index}`} className="px-2 text-zinc-400 text-xs font-bold">
+                    <span key={`feedback-ellipsis-${index}`} className="px-2 text-zinc-400 text-xs font-medium">
                       ...
                     </span>
                   ) : (
                     <button
                       key={item}
                       onClick={() => setFeedbackPage(item)}
-                      className={`min-w-9 h-9 px-3 rounded-xl text-xs font-bold transition-colors ${
+                      className={`min-w-9 h-9 px-3 rounded-xl text-xs font-medium transition-colors ${
                         item === currentFeedbackPage
                           ? 'bg-blue-600 text-white shadow-sm'
                           : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
@@ -841,13 +826,13 @@ export default function ReputationsPage() {
         {activeTab === 'activities' && (
           <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/60 dark:border-zinc-800/50 shadow-sm overflow-hidden animate-fade-in">
             <div className="p-6 border-b border-zinc-100 dark:border-zinc-800/40">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Lịch sử Biến động Uy tín Hệ thống</h3>
+              <h3 className="text-sm font-medium text-zinc-900 dark:text-white">Lịch sử Biến động Uy tín Hệ thống</h3>
             </div>
             
             <div className="p-4 md:p-5 border-b border-zinc-100 dark:border-zinc-800/40 space-y-4">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Loại biến động</span>
+                  <span className="text-[10px] font-medium tracking-tight text-zinc-950 dark:text-zinc-100">Loại biến động</span>
                   <select
                     value={activityTypeFilter}
                     onChange={(e) => setActivityTypeFilter(e.target.value as ActivityTypeFilter)}
@@ -860,7 +845,7 @@ export default function ReputationsPage() {
                 </label>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold tracking-tight text-zinc-950 dark:text-zinc-100">Sắp xếp</span>
+                  <span className="text-[10px] font-medium tracking-tight text-zinc-950 dark:text-zinc-100">Sắp xếp</span>
                   <select
                     value={activitySort}
                     onChange={(e) => setActivitySort(e.target.value as ActivitySortOption)}
@@ -876,10 +861,7 @@ export default function ReputationsPage() {
                 </label>
               </div>
 
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[11px] text-zinc-400 font-medium">
-                  Hiển thị {sortedActivities.length === 0 ? 0 : activityStartIndex + 1}-{activityEndIndex} / {sortedActivities.length} biến động
-                </p>
+              <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => {
                     setActivityTypeFilter('all');
@@ -905,7 +887,7 @@ export default function ReputationsPage() {
                     
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-zinc-900 dark:text-white">{log.studentName}</span>
+                        <span className="text-xs font-medium text-zinc-900 dark:text-white">{log.studentName}</span>
                         <span className="text-[9px] font-mono text-zinc-400">({log.studentCode})</span>
                       </div>
                       <span className="text-[10.5px] text-zinc-500 dark:text-zinc-400 mt-0.5">{log.note}</span>
@@ -950,14 +932,14 @@ export default function ReputationsPage() {
                 <div className="flex items-center gap-1">
                   {activityPaginationItems.map((item, index) =>
                     item === 'ellipsis' ? (
-                      <span key={`activity-ellipsis-${index}`} className="px-2 text-zinc-400 text-xs font-bold">
+                      <span key={`activity-ellipsis-${index}`} className="px-2 text-zinc-400 text-xs font-medium">
                         ...
                       </span>
                     ) : (
                       <button
                         key={item}
                         onClick={() => setActivityPage(item)}
-                        className={`min-w-9 h-9 px-3 rounded-xl text-xs font-bold transition-colors ${
+                        className={`min-w-9 h-9 px-3 rounded-xl text-xs font-medium transition-colors ${
                           item === currentActivityPage
                             ? 'bg-blue-600 text-white shadow-sm'
                             : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
@@ -990,7 +972,7 @@ export default function ReputationsPage() {
           <div className="relative bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-up">
             
             <div className="p-6 border-b border-zinc-100 dark:border-zinc-800/40 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Điều chỉnh Điểm Uy tín</h3>
+              <h3 className="text-sm font-medium text-zinc-900 dark:text-white">Điều chỉnh Điểm Uy tín</h3>
               <button 
                 onClick={closeAdjustmentModal}
                 className="p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
@@ -1003,11 +985,11 @@ export default function ReputationsPage() {
               
               {/* Profile Overview */}
               <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-800/30 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/40">
-                <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium text-sm">
                   {selectedStudent.fullName.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate">{selectedStudent.fullName}</h4>
+                  <h4 className="text-xs font-medium text-zinc-900 dark:text-white truncate">{selectedStudent.fullName}</h4>
                   <span className="text-[10px] text-zinc-400 font-mono block mt-0.5">{selectedStudent.studentCode}</span>
                 </div>
                 <div className="text-right">
@@ -1018,7 +1000,7 @@ export default function ReputationsPage() {
 
               {/* Increase / Decrease Toggle */}
               <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-zinc-950 dark:text-zinc-100 tracking-tight block">Loại điều chỉnh</span>
+                <span className="text-[10px] font-medium text-zinc-950 dark:text-zinc-100 tracking-tight block">Loại điều chỉnh</span>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
@@ -1026,7 +1008,7 @@ export default function ReputationsPage() {
                       setAdjustmentType('increase');
                       setAdjustmentError(null);
                     }}
-                    className={`py-2 px-3 text-xs font-bold rounded-xl transition-all border cursor-pointer ${
+                    className={`py-2 px-3 text-xs font-medium rounded-xl transition-all border cursor-pointer ${
                       adjustmentType === 'increase'
                         ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600'
                         : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'
@@ -1040,7 +1022,7 @@ export default function ReputationsPage() {
                       setAdjustmentType('decrease');
                       setAdjustmentError(null);
                     }}
-                    className={`py-2 px-3 text-xs font-bold rounded-xl transition-all border cursor-pointer ${
+                    className={`py-2 px-3 text-xs font-medium rounded-xl transition-all border cursor-pointer ${
                       adjustmentType === 'decrease'
                         ? 'bg-rose-500/10 border-rose-500 text-rose-500'
                         : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'
@@ -1053,7 +1035,7 @@ export default function ReputationsPage() {
 
               {/* Delta Value */}
               <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-zinc-950 dark:text-zinc-100 tracking-tight block">Số điểm thay đổi</span>
+                <span className="text-[10px] font-medium text-zinc-950 dark:text-zinc-100 tracking-tight block">Số điểm thay đổi</span>
                 <input
                   type="number"
                   min="1"
@@ -1063,13 +1045,13 @@ export default function ReputationsPage() {
                     setAdjustmentDelta(Number(e.target.value));
                     setAdjustmentError(null);
                   }}
-                  className="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-600 transition-colors"
+                  className="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-600 transition-colors"
                 />
               </div>
 
               {/* Note / Justification */}
               <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-zinc-950 dark:text-zinc-100 tracking-tight block">Lý do điều chỉnh</span>
+                <span className="text-[10px] font-medium text-zinc-950 dark:text-zinc-100 tracking-tight block">Lý do điều chỉnh</span>
                 <textarea
                   required
                   rows={3}
@@ -1095,7 +1077,7 @@ export default function ReputationsPage() {
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className={`py-2.5 text-xs font-bold text-white rounded-xl transition-all cursor-pointer shadow-md inline-flex items-center justify-center gap-1.5 ${
+                  className={`py-2.5 text-xs font-medium text-white rounded-xl transition-all cursor-pointer shadow-md inline-flex items-center justify-center gap-1.5 ${
                     adjustmentType === 'increase'
                       ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/10'
                       : 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/10'
@@ -1108,7 +1090,7 @@ export default function ReputationsPage() {
                 <button
                   type="button"
                   onClick={closeAdjustmentModal}
-                  className="py-2.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-300 text-xs font-bold rounded-xl cursor-pointer transition-colors"
+                  className="py-2.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-300 text-xs font-medium rounded-xl cursor-pointer transition-colors"
                 >
                   Hủy bỏ
                 </button>
