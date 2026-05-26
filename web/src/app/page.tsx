@@ -175,7 +175,7 @@ export default async function Home({
                 </div>
                 <Link
                   href="/?category=Tất cả danh mục"
-                  className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl bg-white px-3 py-2 text-[11px] font-bold text-blue-700 shadow-md transition-all hover:bg-zinc-50 hover:shadow-lg active:scale-[0.98] lg:text-xs"
+                  className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-2xl bg-white px-3 py-2 text-[11px] font-medium text-blue-700 shadow-md transition-all hover:bg-zinc-50 hover:shadow-lg active:scale-[0.98] lg:text-xs"
                 >
                   <span>Khám phá ngay</span>
                   <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
@@ -197,15 +197,15 @@ export default async function Home({
               </p>
 
               <div className="mt-4 grid grid-cols-3 gap-2.5">
-                <div className="flex items-center gap-2 whitespace-nowrap rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-[12px] font-medium text-white/92">
+                <div className="flex items-center gap-2 whitespace-nowrap rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-[12px] font-medium text-white">
                   <HeartHandshake className="h-4 w-4 shrink-0 text-cyan-200" />
                   <span>Đồng đội SV</span>
                 </div>
-                <div className="flex items-center gap-2 whitespace-nowrap rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-[12px] font-medium text-white/92">
+                <div className="flex items-center gap-2 whitespace-nowrap rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-[12px] font-medium text-white">
                   <TrendingUp className="h-4 w-4 shrink-0 text-cyan-200" />
                   <span>Duyệt tin nhanh</span>
                 </div>
-                <div className="flex items-center gap-2 whitespace-nowrap rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-[12px] font-medium text-white/92">
+                <div className="flex items-center gap-2 whitespace-nowrap rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-[12px] font-medium text-white">
                   <MessageSquare className="h-4 w-4 shrink-0 text-cyan-200" />
                   <span>Phản hồi 24/7</span>
                 </div>
@@ -292,7 +292,7 @@ export default async function Home({
                   return (
                     <span
                       key={`ell-${idx}`}
-                      className="w-10 h-10 flex items-center justify-center text-zinc-400 font-bold"
+                      className="w-10 h-10 flex items-center justify-center text-zinc-400 font-medium"
                     >
                       ...
                     </span>
@@ -306,7 +306,7 @@ export default async function Home({
                   <Link
                     key={pageNum}
                     href={buildPageUrl(pageNum)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold text-sm transition-all ${
+                    className={`w-10 h-10 flex items-center justify-center rounded-xl font-medium text-sm transition-all ${
                       isActive
                         ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-md shadow-blue-500/20 scale-105'
                         : 'border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-800 dark:hover:text-zinc-200'

@@ -14,6 +14,7 @@ export default function SecurityLogsPage() {
   const [activityLogs, setActivityLogs] = useState<SecurityLogItem[]>([]);
   const [summary, setSummary] = useState({ critical: 0, warning: 0, info: 0 });
   const [pageLoading, setPageLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'CRITICAL' | 'WARNING' | 'INFO'>('ALL');
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -48,43 +49,53 @@ export default function SecurityLogsPage() {
 
   return (
     <DashboardLayout activeItemId="audit-logs" pageTitle="Nhật Ký An Ninh & Cảnh Báo">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <button
-            onClick={() => router.push(APP_ROUTES.ADMIN.DASHBOARD)}
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại Dashboard Tổng Quan</span>
-          </button>
+      <div className="space-y-3">
 
-          <div className="text-[11px] text-zinc-400 font-medium bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded-full flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-rose-500" />
-            <span>Cảnh báo khẩn cấp: {summary.critical + summary.warning}</span>
-          </div>
-        </div>
 
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 p-6 sm:p-8 shadow-sm">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-base font-semibold">Nhật Ký An Ninh & Cảnh Báo Hệ Thống</h3>
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 px-3 py-1.5 text-[11px] font-semibold">
+              <button
+                onClick={() => setActiveFilter(activeFilter === 'CRITICAL' ? 'ALL' : 'CRITICAL')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-semibold transition-all cursor-pointer ${
+                  activeFilter === 'CRITICAL' || activeFilter === 'ALL'
+                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 opacity-50'
+                }`}
+              >
                 <ShieldAlert className="w-3.5 h-3.5" />
                 {summary.critical} nghiêm trọng
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 px-3 py-1.5 text-[11px] font-semibold">
+              </button>
+              <button
+                onClick={() => setActiveFilter(activeFilter === 'WARNING' ? 'ALL' : 'WARNING')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-semibold transition-all cursor-pointer ${
+                  activeFilter === 'WARNING' || activeFilter === 'ALL'
+                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 opacity-50'
+                }`}
+              >
                 <AlertTriangle className="w-3.5 h-3.5" />
                 {summary.warning} cảnh báo
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1.5 text-[11px] font-semibold">
+              </button>
+              <button
+                onClick={() => setActiveFilter(activeFilter === 'INFO' ? 'ALL' : 'INFO')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-semibold transition-all cursor-pointer ${
+                  activeFilter === 'INFO' || activeFilter === 'ALL'
+                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 opacity-50'
+                }`}
+              >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 {summary.info} thông tin
-              </span>
+              </button>
             </div>
           </div>
 
           <div className="space-y-4">
-            {activityLogs.map((log) => (
+            {activityLogs
+              .filter((log) => activeFilter === 'ALL' || log.type === activeFilter)
+              .map((log) => (
               <div
                 key={log.id}
                 className={`p-5 rounded-2xl border flex items-start gap-4 transition-colors ${

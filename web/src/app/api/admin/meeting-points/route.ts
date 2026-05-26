@@ -27,7 +27,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const [meetingPoints, campuses] = await Promise.all([
+    const [meetingPoints, campuses, universities] = await Promise.all([
       prisma.meetingPoint.findMany({
         orderBy: [{ isSafeZone: 'desc' }, { name: 'asc' }],
         include: {
@@ -56,6 +56,10 @@ export async function GET() {
           },
         },
       }),
+      prisma.university.findMany({
+        orderBy: { name: 'asc' },
+        select: { id: true, name: true },
+      }),
     ]);
 
     return NextResponse.json({
@@ -77,6 +81,7 @@ export async function GET() {
         universityId: campus.university.id,
         universityName: campus.university.name,
       })),
+      universities,
     });
   } catch (error) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

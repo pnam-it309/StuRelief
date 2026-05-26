@@ -159,7 +159,7 @@ export default function AdminLoginPage() {
         <section className="w-full max-w-lg rounded-[32px] border border-sky-100 bg-white/94 px-6 py-8 shadow-[0_24px_80px_rgba(59,130,246,0.12)] backdrop-blur-xl sm:px-8 md:px-10">
           <Link
             href={APP_ROUTES.LOGIN}
-            className="mb-8 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 transition hover:text-sky-700"
+            className="mb-8 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-500 transition hover:text-sky-700"
           >
             <ArrowLeft className="h-4 w-4" />
             Về trang sinh viên
@@ -177,7 +177,7 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleLoginSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+              <label className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
                 Email quản trị
               </label>
               <div className="relative">
@@ -196,7 +196,7 @@ export default function AdminLoginPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+              <label className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
                 Mật khẩu
               </label>
               <div className="relative">
@@ -234,7 +234,7 @@ export default function AdminLoginPage() {
 
             <div className="relative flex items-center justify-center py-2">
               <div className="absolute inset-x-0 h-px bg-slate-200" />
-              <span className="relative bg-white px-4 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400">
+              <span className="relative bg-white px-4 text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">
                 hoặc
               </span>
             </div>
@@ -244,7 +244,7 @@ export default function AdminLoginPage() {
               onClick={() => {
                 window.location.href = '/api/auth/google?returnTo=/admin';
               }}
-              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 active:scale-[0.99]"
+              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 active:scale-[0.99]"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

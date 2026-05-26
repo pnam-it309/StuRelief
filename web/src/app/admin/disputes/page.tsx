@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ShieldAlert, 
@@ -9,7 +9,8 @@ import {
   Eye, 
   ArrowLeft,
   Camera,
-  Sparkles
+  Sparkles,
+  Scale
 } from 'lucide-react';
 import DashboardLayout from '@/layouts/dashboard/DashboardLayout';
 import { useAuthGuard } from '@/lib/hooks/useAuthGuard';
@@ -107,11 +108,11 @@ export default function DisputesPage() {
           setDisputes(data);
         }
         setSelectedDispute(null);
-        showFeedback(action === 'RESOLVED' ? 'Xử lý tranh chấp thành công!' : 'Đã chuyển sang trạng thái điều tra.');
+        showFeedback(action === 'RESOLVED' ? 'Xử lý vấn đề thành công!' : 'Đã chuyển sang trạng thái điều tra.');
       }
     } catch (err) {
       console.error('Failed to resolve dispute:', err);
-      showFeedback('Đã có lỗi xảy ra khi xử lý tranh chấp.', 'error');
+      showFeedback('Đã có lỗi xảy ra khi xử lý vấn đề.', 'error');
     } finally {
       setRefreshLoading(false);
     }
@@ -125,18 +126,22 @@ export default function DisputesPage() {
 
   if (loading || refreshLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center p-6">
-        <ShieldAlert className="w-12 h-12 text-rose-600 animate-pulse mb-4" />
-        <span className="text-zinc-500 font-medium text-sm">
-          {refreshLoading ? 'Đang thực thi biện pháp phân xử tranh chấp...' : 'Đang tải phân hệ xử lý tranh chấp...'}
-        </span>
-      </div>
+      <DashboardLayout activeItemId="disputes" pageTitle="Xử Lý Vấn Đề & Đối Soát">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center animate-pulse">
+            <Scale className="w-6 h-6 animate-spin-slow" />
+          </div>
+          <span className="text-zinc-500 font-medium text-sm">
+            {refreshLoading ? 'Đang thực thi biện pháp xử lý vấn đề...' : 'Đang tải phân hệ xử lý vấn đề...'}
+          </span>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout activeItemId="disputes" pageTitle="Xử Lý Tranh Chấp & Đối Soát">
-      <div className="space-y-6">
+    <DashboardLayout activeItemId="disputes" pageTitle="Xử Lý Vấn Đề & Đối Soát">
+      <div className="space-y-3">
         {feedback && (
           <div className={`fixed right-5 top-20 z-50 flex items-center gap-2 rounded-2xl border px-5 py-3 shadow-xl md:top-24 ${
             feedback.type === 'success'
@@ -146,28 +151,12 @@ export default function DisputesPage() {
             <span className="text-sm font-semibold">{feedback.message}</span>
           </div>
         )}
-        
-        {/* Breadcrumb back to dashboard */}
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={() => router.push(APP_ROUTES.ADMIN.DASHBOARD)} 
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại Dashboard Tổng Quan</span>
-          </button>
-          
-          <div className="text-[11px] text-zinc-400 font-medium bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded-full flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-rose-500" />
-            <span>Đang giải quyết: {disputes.filter(d => d.status === 'PENDING' || d.status === 'INVESTIGATING').length}</span>
-          </div>
-        </div>
 
         {/* Content Box */}
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 p-6 sm:p-8 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <h3 className="text-base font-semibold">Đối soát & Xử lý Tranh chấp</h3>
+              <h3 className="text-base font-semibold">Đối soát & Xử lý Vấn đề</h3>
             </div>
             
             {/* Search Box */}
@@ -376,8 +365,8 @@ export default function DisputesPage() {
               )}
 
               {/* Action buttons */}
-              {selectedDispute.status === 'PENDING' && (
-                <div className="grid grid-cols-2 gap-4 border-t border-zinc-100 dark:border-zinc-800/60 pt-6">
+              {selectedDispute.status !== 'RESOLVED' && (
+                <div className="grid grid-cols-2 gap-4 border-t border-zinc-100 dark:border-zinc-800/60 pt-6 mt-6">
                   <button
                     onClick={() => handleResolveDispute(selectedDispute.id, 'RESOLVED')}
                     className="py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-2xl cursor-pointer transition-colors shadow-md shadow-blue-500/10"
@@ -388,13 +377,12 @@ export default function DisputesPage() {
                     onClick={() => setSelectedDispute(null)}
                     className="py-3 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-300 text-xs font-semibold rounded-2xl cursor-pointer transition-colors"
                   >
-                    Xem xét thêm chứng cứ
+                    Đóng cửa sổ
                   </button>
                 </div>
               )}
 
             </div>
-
           </div>
         </div>
       )}

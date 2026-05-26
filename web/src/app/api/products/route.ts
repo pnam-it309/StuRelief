@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { PrismaItemRepository } from '@/infrastructure/persistence/PrismaItemRepository';
 import { GetItemsUseCase } from '@/use-cases/items/GetItemsUseCase';
 import { PostItemUseCase } from '@/use-cases/items/PostItemUseCase';
-import { createUserNotification } from '@/lib/notifications';
+import { createUserNotification, notifyAdmins } from '@/lib/notifications';
+import prisma from '@/lib/prisma';
 
 const itemRepository = new PrismaItemRepository();
 

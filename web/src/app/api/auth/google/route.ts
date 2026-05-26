@@ -22,6 +22,21 @@ function getSuccessPath(returnTo: '/' | '/admin') {
   return returnTo === '/admin' ? '/admin' : '/';
 }
 
+function getAuthOrigin(requestUrl: string) {
+  const requestOrigin = new URL(requestUrl).origin;
+  const configuredAppUrl = env.NEXT_PUBLIC_APP_URL?.trim();
+
+  if (!configuredAppUrl) {
+    return requestOrigin;
+  }
+
+  try {
+    return new URL(configuredAppUrl).origin;
+  } catch {
+    return requestOrigin;
+  }
+}
+
 function redirectWithError(origin: string, returnTo: '/' | '/admin', error: string) {
   return NextResponse.redirect(`${origin}${getLoginPath(returnTo)}?error=${error}`);
 }
@@ -66,7 +81,8 @@ function parseOAuthState(state: string | null): { returnTo: '/' | '/admin' } | n
 
 export async function GET(request: Request) {
   try {
-    const { searchParams, origin } = new URL(request.url);
+    const { searchParams } = new URL(request.url);
+    const origin = getAuthOrigin(request.url);
     const code = searchParams.get('code');
     const oauthError = searchParams.get('error');
     const returnTo = normalizeReturnTo(searchParams.get('returnTo'));
@@ -156,7 +172,8 @@ export async function GET(request: Request) {
     return response;
   } catch (error) {
     console.error('[Google Auth] GET error:', error);
-    const { searchParams, origin } = new URL(request.url);
+    const { searchParams } = new URL(request.url);
+    const origin = getAuthOrigin(request.url);
     const fallbackReturnTo = normalizeReturnTo(searchParams.get('returnTo'));
     if (error instanceof Error && error.message === 'GOOGLE_DB_UNAVAILABLE') {
       return redirectWithError(origin, fallbackReturnTo, 'google_database_unavailable');

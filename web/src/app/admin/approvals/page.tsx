@@ -104,7 +104,7 @@ export default function ApprovalsPage() {
 
   return (
     <DashboardLayout activeItemId="approvals" pageTitle="Xác Thực Thẻ Sinh Viên">
-      <div className="space-y-6">
+      <div className="space-y-3">
         {feedback && (
           <div className={`fixed right-5 top-20 z-50 flex items-center gap-2 rounded-2xl border px-5 py-3 shadow-xl md:top-24 ${
             feedback.type === 'success'
@@ -115,25 +115,11 @@ export default function ApprovalsPage() {
           </div>
         )}
         
-        {/* Breadcrumb back to dashboard */}
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={() => router.push(APP_ROUTES.ADMIN.DASHBOARD)} 
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại Dashboard Tổng Quan</span>
-          </button>
-          
-          <div className="text-[11px] text-zinc-400 font-medium bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded-full flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-amber-500" />
-            <span>Yêu cầu mới: {verifications.filter(v => v.status === 'PENDING').length}</span>
-          </div>
-        </div>
+
 
         {/* Content Box */}
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 p-6 sm:p-8 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
               <h3 className="text-base font-semibold">Xét duyệt thẻ sinh viên & Email trường</h3>
             </div>

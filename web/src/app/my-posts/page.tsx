@@ -199,7 +199,7 @@ export default async function MyPostsPage({
             {pageNumbers.map((p, idx) => {
               if (p === '...') {
                 return (
-                  <span key={`ell-${idx}`} className="flex h-10 w-10 items-center justify-center font-bold text-zinc-400">
+                  <span key={`ell-${idx}`} className="flex h-10 w-10 items-center justify-center font-medium text-zinc-400">
                     ...
                   </span>
                 );
@@ -212,7 +212,7 @@ export default async function MyPostsPage({
                 <Link
                   key={pageNum}
                   href={buildPageUrl(pageNum)}
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold transition-all ${
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium transition-all ${
                     isActive
                       ? 'scale-105 bg-blue-600 text-white shadow-md shadow-blue-500/20 dark:bg-blue-500'
                       : 'border border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200'

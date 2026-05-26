@@ -142,7 +142,7 @@ export default function VerificationPage() {
           </p>
           <button
             onClick={() => router.push('/login')}
-            className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+            className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-medium shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
           >
             Đăng nhập ngay
           </button>
@@ -167,7 +167,7 @@ export default function VerificationPage() {
           </p>
           <button
             onClick={() => router.push('/')}
-            className="bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 px-8 py-3 rounded-2xl font-bold active:scale-95 transition-all"
+            className="bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 px-8 py-3 rounded-2xl font-medium active:scale-95 transition-all"
           >
             Quay lại trang chủ
           </button>
@@ -197,7 +197,7 @@ export default function VerificationPage() {
             <div className="bg-blue-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-blue-500/20">
               <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
               <FileBadge className="w-12 h-12 mb-6 opacity-80" />
-              <h3 className="text-xl font-bold mb-4">Quy trình xác thực</h3>
+              <h3 className="text-xl font-medium mb-4">Quy trình xác thực</h3>
               <ul className="space-y-4">
                 {[
                   { step: 1, title: 'Email trường', desc: 'Sử dụng email .edu.vn để đăng ký hoặc cập nhật.' },
@@ -205,11 +205,11 @@ export default function VerificationPage() {
                   { step: 3, title: 'Duyệt hồ sơ', desc: 'Quản trị viên sẽ phê duyệt trong vòng 24h.' },
                 ].map((s) => (
                   <li key={s.step} className="flex gap-4">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold border border-white/30">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-medium border border-white/30">
                       {s.step}
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm">{s.title}</h4>
+                      <h4 className="font-medium text-sm">{s.title}</h4>
                       <p className="text-[11px] opacity-70 leading-relaxed">{s.desc}</p>
                     </div>
                   </li>
@@ -218,7 +218,7 @@ export default function VerificationPage() {
             </div>
 
             <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6">
-              <h4 className="font-bold text-sm mb-3 flex items-center gap-2">
+              <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
                 Tại sao cần xác thực?
               </h4>
@@ -236,7 +236,7 @@ export default function VerificationPage() {
                     <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
                       <Mail className="w-4 h-4" />
                     </div>
-                    <h3 className="font-bold text-base">Xác minh Email Trường</h3>
+                    <h3 className="font-medium text-base">Xác minh Email Trường</h3>
                   </div>
                   <div className="relative">
                     <input
@@ -266,7 +266,7 @@ export default function VerificationPage() {
                     <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                       <IdCard className="w-4 h-4" />
                     </div>
-                    <h3 className="font-bold text-base">Tải ảnh Thẻ Sinh Viên</h3>
+                    <h3 className="font-medium text-base">Tải ảnh Thẻ Sinh Viên</h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -279,7 +279,7 @@ export default function VerificationPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-2xl text-sm shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-2xl text-sm shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                   >
                     {submitting ? (
                       <>

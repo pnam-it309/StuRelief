@@ -121,21 +121,14 @@ export default function AdminPostsPage() {
 
   return (
     <DashboardLayout activeItemId="posts" pageTitle="Duyệt Bài Đăng">
-      <div className="space-y-6">
+      <div className="space-y-3">
         {feedback && (
           <div className={`fixed right-5 top-20 z-50 flex items-center gap-2 rounded-2xl border px-5 py-3 shadow-xl md:top-24 ${feedback.type === 'success' ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-rose-500 text-white border-rose-400'}`}>
             <span className="text-sm font-semibold">{feedback.message}</span>
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-4">
-          <button
-            onClick={() => router.push(APP_ROUTES.ADMIN.DASHBOARD)}
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại Dashboard</span>
-          </button>
+        <div className="flex items-center justify-end gap-4">
 
           <div className="text-[11px] text-zinc-400 font-medium bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded-full flex items-center gap-1">
             <PackageCheck className="w-3 h-3 text-amber-500" />
@@ -144,7 +137,7 @@ export default function AdminPostsPage() {
         </div>
 
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 p-6 sm:p-8 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
               <h3 className="text-base font-semibold">Bài đăng chờ admin duyệt</h3>
             </div>
@@ -254,7 +247,7 @@ export default function AdminPostsPage() {
               {pageNumbers.map((item, index) => {
                 if (item === 'ellipsis') {
                   return (
-                    <span key={`ellipsis-${index}`} className="w-10 h-10 flex items-center justify-center text-zinc-400 font-bold">
+                    <span key={`ellipsis-${index}`} className="w-10 h-10 flex items-center justify-center text-zinc-400 font-medium">
                       ...
                     </span>
                   );
@@ -265,7 +258,7 @@ export default function AdminPostsPage() {
                   <button
                     key={item}
                     onClick={() => setPage(item)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold text-sm transition-all ${
+                    className={`w-10 h-10 flex items-center justify-center rounded-xl font-medium text-sm transition-all ${
                       isActive
                         ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-md shadow-blue-500/20 scale-105'
                         : 'border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-800 dark:hover:text-zinc-200'
@@ -307,10 +300,10 @@ export default function AdminPostsPage() {
 
             <div className="p-6 md:p-8">
               <div className="flex flex-wrap gap-2 mb-4">
-                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-3 py-1.5 rounded-full">
+                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium px-3 py-1.5 rounded-full">
                   {selectedPost.category}
                 </span>
-                <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${PRODUCT_STATUS_CLASSES[selectedPost.status]}`}>
+                <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${PRODUCT_STATUS_CLASSES[selectedPost.status]}`}>
                   {PRODUCT_STATUS_LABELS[selectedPost.status]}
                 </span>
               </div>
@@ -322,7 +315,7 @@ export default function AdminPostsPage() {
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Người đăng: {selectedPost.studentId}</p>
               <hr className="border-zinc-200 dark:border-zinc-800 my-4" />
               <div className="mb-6">
-                <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-2 tracking-tight">Mô tả chi tiết</h4>
+                <h4 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2 tracking-tight">Mô tả chi tiết</h4>
                 <p className="text-zinc-600 dark:text-zinc-300 text-sm whitespace-pre-line leading-relaxed">
                   {selectedPost.description || 'Bài đăng này chưa có mô tả chi tiết.'}
                 </p>

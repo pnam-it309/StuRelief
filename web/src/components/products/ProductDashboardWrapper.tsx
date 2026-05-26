@@ -24,6 +24,14 @@ interface ProductDashboardWrapperProps {
   initialTab?: 'all' | 'my';
 }
 
+const ITEM_CONDITIONS = [
+  { value: 'NEW', label: 'Mới 100%' },
+  { value: 'USED_LIKE_NEW', label: 'Như mới' },
+  { value: 'USED_GOOD', label: 'Sử dụng tốt' },
+  { value: 'USED_FAIR', label: 'Khá' },
+  { value: 'USED_POOR', label: 'Cũ' },
+];
+
 const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
   initialItems,
   total,
@@ -39,7 +47,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
   const [items, setItems] = useState<Item[]>(initialItems);
   const [totalCount, setTotalCount] = useState(total);
   const [myTotalCount, setMyTotalCount] = useState(myTotal);
-  const [activeTab, setActiveTab] = useState<'all' | 'my'>(pathname === '/my-posts' ? 'my' : 'all');
+  const activeTab = pathname === '/my-posts' ? 'my' : 'all';
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; role: 'STUDENT' | 'ADMIN'; fullName: string } | null>(null);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -52,6 +60,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
   const [formCategory, setFormCategory] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formImage, setFormImage] = useState('');
+  const [formCondition, setFormCondition] = useState('USED_GOOD');
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const [mounted, setMounted] = useState(false);
@@ -101,7 +110,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
 
   const displayedItems = activeTab === 'all'
     ? items.filter((item) => item.status === 'AVAILABLE')
-    : items.filter((item) => currentUser && item.studentId === currentUser.id);
+    : items;
 
   const handleOpenCreate = () => {
     if (!currentUser) {
@@ -115,6 +124,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
     setFormCategory(categories[0] || '');
     setFormDescription('');
     setFormImage('');
+    setFormCondition('USED_GOOD');
     setIsCreateOpen(true);
   };
 
@@ -146,6 +156,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
           description: formDescription,
           images: [formImage || aiImageUrl(`realistic AI student marketplace product photo of ${formName}`, { width: 400, height: 400, seed: formName })],
           studentId: currentUser.id,
+          condition: formCondition,
         }),
       });
 
@@ -169,6 +180,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
     setFormCategory(categories.includes(product.category) ? product.category : (categories[0] || ''));
     setFormDescription(product.description || '');
     setFormImage(product.images[0] || '');
+    setFormCondition(product.condition || 'USED_GOOD');
     setIsEditOpen(true);
   };
 
@@ -195,6 +207,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
           description: formDescription,
           images: [formImage || aiImageUrl(`realistic AI student marketplace product photo of ${formName}`, { width: 400, height: 400, seed: formName })],
           studentId: selectedProduct.studentId,
+          condition: formCondition,
         }),
       });
 
@@ -271,8 +284,8 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
 
       <div className="flex border-b border-zinc-200 dark:border-zinc-800 mb-6">
         <button
-          onClick={() => setActiveTab('all')}
-          className={`pb-4 px-6 text-sm font-bold transition-all relative ${
+          onClick={() => { if (pathname !== '/') router.push('/'); }}
+          className={`pb-4 px-6 text-sm font-medium transition-all relative ${
             activeTab === 'all'
               ? 'text-blue-600 dark:text-blue-400'
               : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
@@ -282,8 +295,15 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
           {activeTab === 'all' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full" />}
         </button>
         <button
-          onClick={() => setActiveTab('my')}
-          className={`pb-4 px-6 text-sm font-bold transition-all relative ${
+          onClick={() => {
+            if (!currentUser) {
+              showFeedback('Bạn cần đăng nhập để xem sản phẩm của tôi!', 'error');
+              setTimeout(() => router.push('/login'), 1500);
+            } else if (pathname !== '/my-posts') {
+              router.push('/my-posts');
+            }
+          }}
+          className={`pb-4 px-6 text-sm font-medium transition-all relative ${
             activeTab === 'my'
               ? 'text-blue-600 dark:text-blue-400'
               : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
@@ -306,11 +326,11 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
       {displayedItems.length === 0 && (
         <div className="text-center py-20 bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800">
           <PackageOpen className="w-16 h-16 text-zinc-400 mx-auto mb-4" strokeWidth={1.5} />
-          <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 mb-1">Không tìm thấy sản phẩm nào</h3>
+          <h3 className="text-lg font-medium text-zinc-800 dark:text-zinc-200 mb-1">Không tìm thấy sản phẩm nào</h3>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">Hãy thử đổi từ khóa tìm kiếm hoặc đăng bán sản phẩm mới!</p>
           <button
             onClick={handleOpenCreate}
-            className="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-2xl text-sm transition-all"
+            className="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-2xl text-sm transition-all"
           >
             Đăng bán sản phẩm ngay
           </button>
@@ -348,13 +368,13 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
             </div>
             <div className="p-6 md:p-10 flex flex-col justify-center">
               <div className="flex flex-wrap gap-2 mb-4">
-                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-3 py-1.5 rounded-full">
+                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium px-3 py-1.5 rounded-full">
                   {selectedProduct.category}
                 </span>
-                <span className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-xs font-bold px-3 py-1.5 rounded-full">
-                  Tình trạng: Khá tốt
+                <span className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-xs font-medium px-3 py-1.5 rounded-full">
+                  Tình trạng: {ITEM_CONDITIONS.find(c => c.value === selectedProduct.condition)?.label || 'Không xác định'}
                 </span>
-                <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${PRODUCT_STATUS_CLASSES[selectedProduct.status]}`}>
+                <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${PRODUCT_STATUS_CLASSES[selectedProduct.status]}`}>
                   {PRODUCT_STATUS_LABELS[selectedProduct.status]}
                 </span>
               </div>
@@ -364,7 +384,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
               </p>
               <hr className="border-zinc-200 dark:border-zinc-800 my-4" />
               <div className="mb-6">
-                <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-2 tracking-tight">Mô tả chi tiết</h4>
+                <h4 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2 tracking-tight">Mô tả chi tiết</h4>
                 <p className="text-zinc-600 dark:text-zinc-300 text-sm whitespace-pre-line leading-relaxed">
                   {selectedProduct.description || 'Chủ bài đăng không cung cấp mô tả thêm cho sản phẩm này.'}
                 </p>
@@ -375,14 +395,14 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
                     setIsDetailOpen(false);
                     showFeedback('Đã sao chép thông tin liên hệ của sinh viên!');
                   }}
-                  className="flex-1 py-3 bg-zinc-950 dark:bg-zinc-100 hover:bg-zinc-850 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-bold rounded-2xl text-sm transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-zinc-950 dark:bg-zinc-100 hover:bg-zinc-850 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-medium rounded-2xl text-sm transition-all flex items-center justify-center gap-2"
                 >
                   <MessageSquare className="w-5 h-5" />
                   Nhắn tin trao đổi ngay
                 </button>
                 <button
                   onClick={() => setIsDetailOpen(false)}
-                  className="py-3 px-6 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold rounded-2xl text-sm transition-all"
+                  className="py-3 px-6 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-medium rounded-2xl text-sm transition-all"
                 >
                   <span className="mr-2 inline-flex align-middle">
                     <XCircle className="h-4 w-4" />
@@ -417,7 +437,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
               </div>
               <form onSubmit={handleCreateSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Tên sản phẩm *</label>
+                  <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Tên sản phẩm *</label>
                   <input
                     type="text"
                     required
@@ -429,7 +449,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Giá bán (VND) *</label>
+                    <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Giá bán (VND) *</label>
                     <input
                       type="text"
                       required
@@ -443,20 +463,32 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Danh mục *</label>
+                    <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Tình trạng *</label>
                     <select
-                      value={formCategory}
-                      onChange={(e) => setFormCategory(e.target.value)}
+                      value={formCondition}
+                      onChange={(e) => setFormCondition(e.target.value)}
                       className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm outline-none focus:border-blue-500 transition-all font-semibold"
                     >
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>{cat}</option>
+                      {ITEM_CONDITIONS.map((cond) => (
+                        <option key={cond.value} value={cond.value}>{cond.label}</option>
                       ))}
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Mô tả thêm</label>
+                  <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Danh mục *</label>
+                  <select
+                    value={formCategory}
+                    onChange={(e) => setFormCategory(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm outline-none focus:border-blue-500 transition-all font-semibold"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Mô tả thêm</label>
                   <textarea
                     rows={3}
                     value={formDescription}
@@ -466,10 +498,10 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
                   />
                 </div>
                 <div className="flex gap-3 pt-4">
-                  <button type="submit" className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-sm transition-all">
+                  <button type="submit" className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl text-sm transition-all">
                     Đăng tin ngay
                   </button>
-                  <button type="button" onClick={() => setIsCreateOpen(false)} className="py-3 px-6 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-200 font-bold rounded-2xl text-sm transition-all">
+                  <button type="button" onClick={() => setIsCreateOpen(false)} className="py-3 px-6 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-200 font-medium rounded-2xl text-sm transition-all">
                     Hủy bỏ
                   </button>
                 </div>
@@ -501,7 +533,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
               </div>
               <form onSubmit={handleEditSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Tên sản phẩm *</label>
+                  <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Tên sản phẩm *</label>
                   <input
                     type="text"
                     required
@@ -512,7 +544,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Giá bán (VND) *</label>
+                    <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Giá bán (VND) *</label>
                     <input
                       type="text"
                       required
@@ -526,20 +558,32 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Danh mục *</label>
+                    <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Tình trạng *</label>
                     <select
-                      value={formCategory}
-                      onChange={(e) => setFormCategory(e.target.value)}
+                      value={formCondition}
+                      onChange={(e) => setFormCondition(e.target.value)}
                       className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm outline-none focus:border-blue-500 transition-all font-semibold"
                     >
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>{cat}</option>
+                      {ITEM_CONDITIONS.map((cond) => (
+                        <option key={cond.value} value={cond.value}>{cond.label}</option>
                       ))}
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Mô tả thêm</label>
+                  <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Danh mục *</label>
+                  <select
+                    value={formCategory}
+                    onChange={(e) => setFormCategory(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm outline-none focus:border-blue-500 transition-all font-semibold"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-950 dark:text-zinc-100 mb-2 tracking-tight">Mô tả thêm</label>
                   <textarea
                     rows={3}
                     value={formDescription}
@@ -548,10 +592,10 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
                   />
                 </div>
                 <div className="flex gap-3 pt-4">
-                  <button type="submit" className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl text-sm transition-all">
+                  <button type="submit" className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl text-sm transition-all">
                     Lưu thay đổi
                   </button>
-                  <button type="button" onClick={() => setIsEditOpen(false)} className="py-3 px-6 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-200 font-bold rounded-2xl text-sm transition-all">
+                  <button type="button" onClick={() => setIsEditOpen(false)} className="py-3 px-6 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-200 font-medium rounded-2xl text-sm transition-all">
                     Hủy
                   </button>
                 </div>

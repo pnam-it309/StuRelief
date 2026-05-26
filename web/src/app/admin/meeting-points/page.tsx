@@ -7,10 +7,11 @@ import {
   Camera,
   Map,
   MapPin,
-  Plus,
+  Plus, Pencil, Trash2, Eye,
   Search,
   ShieldCheck,
   Sparkles,
+  X,
 } from 'lucide-react';
 import DashboardLayout from '@/layouts/dashboard/DashboardLayout';
 import { useAuthGuard } from '@/lib/hooks/useAuthGuard';
@@ -50,9 +51,18 @@ export default function AdminMeetingPointsPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState('');
+  const [filterCampus, setFilterCampus] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewingPoint, setViewingPoint] = useState<MeetingPoint | null>(null);
   const [points, setPoints] = useState<MeetingPoint[]>([]);
   const [campuses, setCampuses] = useState<CampusOption[]>([]);
   const [form, setForm] = useState(INITIAL_FORM);
+  const [universities, setUniversities] = useState<{ id: string; name: string }[]>([]);
+  const [showCampusModal, setShowCampusModal] = useState(false);
+  const [campusForm, setCampusForm] = useState({ name: '', address: '', universityName: '' });
+  const [creatingCampus, setCreatingCampus] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
@@ -71,9 +81,11 @@ export default function AdminMeetingPointsPage() {
       const data = await res.json();
       const nextPoints = Array.isArray(data.data) ? data.data : [];
       const nextCampuses = Array.isArray(data.campuses) ? data.campuses : [];
+      const nextUniversities = Array.isArray(data.universities) ? data.universities : [];
 
       setPoints(nextPoints);
       setCampuses(nextCampuses);
+      setUniversities(nextUniversities);
       setForm((prev) => ({
         ...prev,
         campusId: prev.campusId || nextCampuses[0]?.id || '',
@@ -93,16 +105,111 @@ export default function AdminMeetingPointsPage() {
   }, [currentUser]);
 
   const filteredPoints = useMemo(() => {
+    let result = points;
+    
+    if (filterCampus !== 'all') {
+      result = result.filter(p => p.campusId === filterCampus);
+    }
+    
     const keyword = search.trim().toLowerCase();
-    if (!keyword) return points;
+    if (keyword) {
+      result = result.filter((point) => {
+        const haystack = `${point.name} ${point.campusName} ${point.universityName} ${point.description ?? ''}`.toLowerCase();
+        return haystack.includes(keyword);
+      });
+    }
 
-    return points.filter((point) => {
-      const haystack = `${point.name} ${point.campusName} ${point.universityName} ${point.description ?? ''}`.toLowerCase();
-      return haystack.includes(keyword);
-    });
-  }, [points, search]);
+    return result;
+  }, [points, search, filterCampus]);
 
   const safeCount = points.filter((point) => point.isSafeZone).length;
+
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingPhoto(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      
+      setForm(prev => ({ ...prev, photoUrl: data.url || '' }));
+      showFeedback('Tải ảnh lên thành công!');
+    } catch (err) {
+      console.error(err);
+      showFeedback('Không thể tải ảnh lên.', 'error');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleCreateCampus = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!campusForm.name.trim() || !campusForm.universityName.trim()) {
+      showFeedback('Tên Campus và Trường Đại học là bắt buộc.', 'error');
+      return;
+    }
+    try {
+      setCreatingCampus(true);
+      const res = await fetch('/api/admin/campuses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(campusForm),
+      });
+      if (!res.ok) throw new Error('Create campus failed');
+      const newCampus = await res.json();
+      
+      showFeedback('Đã tạo Campus thành công.');
+      setShowCampusModal(false);
+      setCampusForm({ name: '', address: '', universityName: '' });
+      
+      // Refresh list & set selected
+      await fetchMeetingPoints();
+      setForm(prev => ({ ...prev, campusId: newCampus.id }));
+    } catch (err) {
+      console.error(err);
+      showFeedback('Không tạo được Campus.', 'error');
+    } finally {
+      setCreatingCampus(false);
+    }
+  };
+
+    const handleEdit = (point: MeetingPoint) => {
+    setEditingId(point.id);
+    setForm({
+      name: point.name,
+      campusId: point.campusId,
+      description: point.description || '',
+      photoUrl: point.photoUrl || '',
+      isSafeZone: point.isSafeZone,
+    });
+    setViewMode('form');
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa điểm hẹn này?')) return;
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/admin/meeting-points/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      showFeedback('Đã xóa điểm hẹn.');
+      await fetchMeetingPoints();
+    } catch (err) {
+      console.error(err);
+      showFeedback('Không thể xóa điểm hẹn.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -114,8 +221,10 @@ export default function AdminMeetingPointsPage() {
 
     try {
       setSubmitting(true);
-      const res = await fetch('/api/admin/meeting-points', {
-        method: 'POST',
+      const url = editingId ? `/api/admin/meeting-points/${editingId}` : '/api/admin/meeting-points';
+      const method = editingId ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: form.name,
@@ -135,7 +244,9 @@ export default function AdminMeetingPointsPage() {
         campusId: campuses[0]?.id || '',
       });
       await fetchMeetingPoints();
-      showFeedback('Đã tạo điểm hẹn an toàn mới.');
+      showFeedback(editingId ? 'Đã cập nhật điểm hẹn.' : 'Đã tạo điểm hẹn an toàn mới.');
+      setEditingId(null);
+      setViewMode('list');
     } catch (error) {
       console.error('Lỗi khi tạo điểm hẹn:', error);
       showFeedback('Không tạo được điểm hẹn.', 'error');
@@ -155,7 +266,7 @@ export default function AdminMeetingPointsPage() {
 
   return (
     <DashboardLayout activeItemId="meeting-points" pageTitle="Điểm hẹn an toàn">
-      <div className="space-y-6">
+      <div className="space-y-3">
         {feedback && (
           <div
             className={`fixed right-5 top-20 z-50 flex items-center gap-2 rounded-2xl border px-5 py-3 shadow-xl md:top-24 ${
@@ -168,14 +279,7 @@ export default function AdminMeetingPointsPage() {
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-4">
-          <button
-            onClick={() => router.push(APP_ROUTES.ADMIN.DASHBOARD)}
-            className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Quay lại dashboard</span>
-          </button>
+        <div className="flex items-center justify-end gap-4">
 
           <div className="flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1.5 text-[11px] font-medium text-zinc-500 dark:bg-zinc-800">
             <Sparkles className="h-3 w-3 text-emerald-500" />
@@ -183,15 +287,24 @@ export default function AdminMeetingPointsPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-          <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-900">
-            <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
-                <Plus className="h-5 w-5" />
+        <div>
+          {viewMode === 'form' ? (
+          <section className="mx-auto max-w-2xl w-full rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-900">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
+                  <Plus className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-zinc-950 dark:text-white">{editingId ? 'Cập nhật điểm hẹn' : 'Tạo điểm hẹn mới'}</h2>
+                </div>
               </div>
-              <div>
-                <h2 className="text-base font-semibold text-zinc-950 dark:text-white">Tạo điểm hẹn mới</h2>
-              </div>
+              <button 
+                onClick={() => { setViewMode('list'); setEditingId(null); setForm({...INITIAL_FORM, campusId: campuses[0]?.id || ''}); }}
+                className="text-sm font-medium text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors px-3 py-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
+                Quay lại
+              </button>
             </div>
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -206,7 +319,12 @@ export default function AdminMeetingPointsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Campus</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Campus</label>
+                  <button type="button" onClick={() => setShowCampusModal(true)} className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1">
+                    <Plus className="w-3 h-3" /> Tạo mới
+                  </button>
+                </div>
                 <select
                   value={form.campusId}
                   onChange={(e) => setForm((prev) => ({ ...prev, campusId: e.target.value }))}
@@ -233,13 +351,28 @@ export default function AdminMeetingPointsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Ảnh minh họa</label>
-                <input
-                  value={form.photoUrl}
-                  onChange={(e) => setForm((prev) => ({ ...prev, photoUrl: e.target.value }))}
-                  placeholder="Dán URL ảnh nếu có"
-                  className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition-colors focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-blue-400"
-                />
+                <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Vị trí</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="flex-1 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm outline-none transition-colors focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-blue-400 file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-500/10 dark:file:text-blue-400"
+                  />
+                  {uploadingPhoto && <span className="text-xs font-medium text-blue-500 flex-shrink-0 animate-pulse">Đang tải lên...</span>}
+                </div>
+                {form.photoUrl && (
+                  <div className="relative mt-2 h-24 w-24 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                    <img src={form.photoUrl} alt="Preview" className="h-full w-full object-cover" />
+                    <button 
+                      type="button"
+                      onClick={() => setForm(prev => ({ ...prev, photoUrl: '' }))}
+                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 backdrop-blur-md transition-colors"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <label className="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950">
@@ -261,37 +394,45 @@ export default function AdminMeetingPointsPage() {
                 className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Plus className="h-4 w-4" />
-                {submitting ? 'Đang tạo...' : 'Tạo điểm hẹn'}
+                {submitting ? (editingId ? 'Đang cập nhật...' : 'Đang tạo...') : (editingId ? 'Lưu thay đổi' : 'Tạo điểm hẹn')}
               </button>
             </form>
           </section>
-
+          ) : (
           <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-900">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex flex-wrap gap-3">
-                <div className="rounded-2xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-                  <div className="text-xs font-semibold text-zinc-500">Tổng điểm</div>
-                  <div className="mt-1 text-2xl font-black text-zinc-950 dark:text-white">{points.length}</div>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-2/3">
+                <div className="relative w-full md:flex-1">
+                  <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-400" />
+                  <input
+                    type="text"
+                    placeholder="Tìm điểm hẹn..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 py-3 pl-10 pr-4 text-sm outline-none transition-colors focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-blue-400"
+                  />
                 </div>
-                <div className="rounded-2xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-                  <div className="text-xs font-semibold text-zinc-500">An toàn</div>
-                  <div className="mt-1 text-2xl font-black text-zinc-950 dark:text-white">{safeCount}</div>
-                </div>
-                <div className="rounded-2xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-                  <div className="text-xs font-semibold text-zinc-500">Campus</div>
-                  <div className="mt-1 text-2xl font-black text-zinc-950 dark:text-white">{new Set(points.map((point) => point.campusId)).size}</div>
-                </div>
+
+                <select
+                  value={filterCampus}
+                  onChange={(e) => setFilterCampus(e.target.value)}
+                  className="w-full md:w-96 lg:w-[400px] rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition-colors focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-blue-400"
+                >
+                  <option value="all">Tất cả Campus</option>
+                  {campuses.map(c => (
+                    <option key={c.id} value={c.id}>{c.universityName} - {c.name}</option>
+                  ))}
+                </select>
               </div>
 
-              <div className="relative w-full md:w-72">
-                <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-400" />
-                <input
-                  type="text"
-                  placeholder="Tìm điểm hẹn..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 py-3 pl-10 pr-4 text-sm outline-none transition-colors focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-blue-400"
-                />
+              <div className="flex justify-end w-full lg:w-auto">
+                <button
+                  onClick={() => setViewMode('form')}
+                  className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500 shadow-sm"
+                >
+                  <Plus className="h-5 w-5" />
+                  <span>Thêm điểm hẹn</span>
+                </button>
               </div>
             </div>
 
@@ -309,7 +450,7 @@ export default function AdminMeetingPointsPage() {
                         <MapPin className="h-12 w-12 text-white/90" />
                       </div>
                     )}
-                    <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold text-zinc-900">
+                    <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-medium text-zinc-900">
                       {point.isSafeZone ? 'An toàn' : 'Công khai'}
                     </div>
                   </div>
@@ -317,7 +458,7 @@ export default function AdminMeetingPointsPage() {
                   <div className="space-y-4 p-5">
                     <div>
                       <div className="text-[11px] font-semibold text-zinc-400">{point.universityName}</div>
-                      <h3 className="mt-1 text-base font-bold text-zinc-950 dark:text-white">{point.name}</h3>
+                      <h3 className="mt-1 text-base font-medium text-zinc-950 dark:text-white">{point.name}</h3>
                       <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{point.campusName}</div>
                     </div>
 
@@ -341,6 +482,27 @@ export default function AdminMeetingPointsPage() {
                         {point.campusAddress}
                       </div>
                     ) : null}
+
+                    <div className="flex items-center gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/50">
+                      <button
+                        onClick={() => setViewingPoint(point)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors dark:text-emerald-400 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> Xem
+                      </button>
+                      <button
+                        onClick={() => handleEdit(point)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors dark:text-blue-400 dark:bg-blue-500/10 dark:hover:bg-blue-500/20"
+                      >
+                        <Pencil className="w-3.5 h-3.5" /> Sửa
+                      </button>
+                      <button
+                        onClick={() => handleDelete(point.id)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors dark:text-rose-400 dark:bg-rose-500/10 dark:hover:bg-rose-500/20"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Xóa
+                      </button>
+                    </div>
                   </div>
                 </article>
               ))}
@@ -352,8 +514,152 @@ export default function AdminMeetingPointsPage() {
               )}
             </div>
           </section>
+          )}
         </div>
       </div>
+
+      {/* Campus Modal */}
+      {showCampusModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 animate-fade-in backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Tạo Campus mới</h3>
+              <button
+                onClick={() => setShowCampusModal(false)}
+                className="rounded-xl p-2 text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateCampus} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Trường Đại học</label>
+                <input
+                  type="text"
+                  list="universities-list"
+                  value={campusForm.universityName}
+                  onChange={(e) => setCampusForm((prev) => ({ ...prev, universityName: e.target.value }))}
+                  placeholder="Chọn hoặc gõ tên trường mới..."
+                  className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition-colors focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-blue-400"
+                />
+                <datalist id="universities-list">
+                  {universities.map((u) => (
+                    <option key={u.id} value={u.name} />
+                  ))}
+                </datalist>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Tên Campus</label>
+                <input
+                  value={campusForm.name}
+                  onChange={(e) => setCampusForm((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="Ví dụ: Cơ sở 2, Dĩ An"
+                  className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition-colors focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-blue-400"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Địa chỉ (tùy chọn)</label>
+                <input
+                  value={campusForm.address}
+                  onChange={(e) => setCampusForm((prev) => ({ ...prev, address: e.target.value }))}
+                  placeholder="Địa chỉ cụ thể"
+                  className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition-colors focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-blue-400"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={creatingCampus}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {creatingCampus ? 'Đang lưu...' : 'Lưu Campus'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    
+      {/* View Detail Modal */}
+      {viewingPoint && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 animate-fade-in backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-2xl rounded-3xl bg-white shadow-2xl dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden my-8">
+            <button
+              onClick={() => setViewingPoint(null)}
+              className="absolute right-4 top-4 z-10 rounded-full bg-black/20 p-2 text-white hover:bg-black/40 backdrop-blur-md transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            
+            <div className="relative h-64 md:h-80 w-full bg-zinc-100 dark:bg-zinc-800">
+              {viewingPoint.photoUrl ? (
+                <img src={viewingPoint.photoUrl} alt={viewingPoint.name} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center text-zinc-400">
+                  <MapPin className="mb-2 h-16 w-16 opacity-50" />
+                  <span className="text-sm font-medium">Chưa có ảnh mô tả</span>
+                </div>
+              )}
+              <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold text-zinc-900 shadow-sm">
+                {viewingPoint.isSafeZone ? '✓ Ưu tiên an toàn' : 'Điểm công khai'}
+              </div>
+            </div>
+
+            <div className="p-6 md:p-8 space-y-6">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-900/40 dark:text-blue-400">
+                    {viewingPoint.universityName}
+                  </span>
+                </div>
+                <h2 className="text-2xl font-bold text-zinc-950 dark:text-white">{viewingPoint.name}</h2>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 rounded-lg bg-zinc-100 p-2 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                      <MapPin className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Campus</div>
+                      <div className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{viewingPoint.campusName}</div>
+                      {viewingPoint.campusAddress && (
+                        <div className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{viewingPoint.campusAddress}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                      <ShieldCheck className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Trạng thái an toàn</div>
+                      <div className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                        {viewingPoint.isSafeZone ? 'Khuyến nghị an toàn' : 'Khu vực tự quản'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-5 dark:border-zinc-800/50 dark:bg-zinc-900/50">
+                <h3 className="mb-2 text-sm font-bold text-zinc-900 dark:text-white">Mô tả chi tiết</h3>
+                <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300 whitespace-pre-wrap">
+                  {viewingPoint.description || 'Chưa có mô tả chi tiết cho điểm hẹn này.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

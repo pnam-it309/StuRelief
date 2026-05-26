@@ -7,8 +7,10 @@ export interface Item {
   category: string;
   images: string[];
   studentId: string;
+  sellerName?: string;
   isQuickSell: boolean;
   status: ProductStatus;
+  condition?: string;
   description?: string;
   createdAt: Date;
   updatedAt: Date;

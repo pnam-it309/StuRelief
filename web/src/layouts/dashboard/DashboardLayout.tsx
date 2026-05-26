@@ -454,7 +454,7 @@ export default function DashboardLayout({
                   >
                     <Bell className="w-4 h-4" />
                     {notificationBadge > 0 && (
-                      <span className="absolute -top-2 -right-2 min-w-[1.35rem] h-[1.35rem] px-1.5 bg-rose-500 text-white text-[10px] font-bold leading-none rounded-full flex items-center justify-center border-2 border-white dark:border-[#242526] shadow-[0_4px_10px_rgba(244,63,94,0.45)]">
+                      <span className="absolute -top-2 -right-2 min-w-[1.35rem] h-[1.35rem] px-1.5 bg-rose-500 text-white text-[10px] font-medium leading-none rounded-full flex items-center justify-center border-2 border-white dark:border-[#242526] shadow-[0_4px_10px_rgba(244,63,94,0.45)]">
                         {notificationLabel}
                       </span>
                     )}
@@ -464,7 +464,7 @@ export default function DashboardLayout({
                     <div className="absolute right-0 top-12 w-[340px] max-w-[calc(100vw-2rem)] rounded-2xl border border-[#dfe3ea] dark:border-[#3a3b3c] bg-white dark:bg-[#242526] shadow-2xl overflow-hidden z-50">
                       <div className="px-4 py-3 border-b border-[#edf0f5] dark:border-[#3a3b3c] flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-bold text-zinc-900 dark:text-white">Thông báo</p>
+                          <p className="text-sm font-medium text-zinc-900 dark:text-white">Thông báo</p>
                         </div>
                         <Sparkles className="w-4 h-4 text-rose-500" />
                       </div>
