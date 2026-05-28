@@ -32,7 +32,9 @@ export class PrismaVerificationRepository implements IVerificationRepository {
       campus: req.user.profile?.university.name || 'Unknown',
       cardImage: req.studentCardFront,
       status: req.status,
-      date: req.createdAt.toISOString()
+      date: req.createdAt.toISOString(),
+      dateOfBirth: req.user.profile?.dateOfBirth?.toISOString() || undefined,
+      hometown: req.user.profile?.hometown || undefined,
     }));
   }
 
@@ -63,7 +65,9 @@ export class PrismaVerificationRepository implements IVerificationRepository {
       campus: req.user.profile?.university.name || 'Unknown',
       cardImage: req.studentCardFront,
       status: req.status,
-      date: req.createdAt.toISOString()
+      date: req.createdAt.toISOString(),
+      dateOfBirth: req.user.profile?.dateOfBirth?.toISOString() || undefined,
+      hometown: req.user.profile?.hometown || undefined,
     };
   }
 
@@ -89,7 +93,16 @@ export class PrismaVerificationRepository implements IVerificationRepository {
     }
   }
 
-  async save(data: { userId: string; studentCardFront: string; studentCardBack: string; emailOtp?: string }): Promise<void> {
+  async save(data: { 
+    userId: string; 
+    studentCardFront: string; 
+    studentCardBack: string; 
+    emailOtp?: string;
+    fullName?: string;
+    dateOfBirth?: Date;
+    hometown?: string;
+    universityId?: string;
+  }): Promise<void> {
     await prisma.verificationRequest.create({
       data: {
         userId: data.userId,
@@ -104,5 +117,17 @@ export class PrismaVerificationRepository implements IVerificationRepository {
       where: { id: data.userId },
       data: { status: 'UNVERIFIED' } // Ensure it's not BANNED or something else
     });
+
+    if (data.fullName || data.dateOfBirth || data.hometown || data.universityId) {
+      await prisma.studentProfile.update({
+        where: { userId: data.userId },
+        data: {
+          ...(data.fullName && { fullName: data.fullName }),
+          ...(data.dateOfBirth && { dateOfBirth: data.dateOfBirth }),
+          ...(data.hometown && { hometown: data.hometown }),
+          ...(data.universityId && { universityId: data.universityId }),
+        }
+      });
+    }
   }
 }

@@ -60,16 +60,19 @@ export async function POST(request: Request) {
 
     // 4. Thiết lập HTTP-only cookie theo phiên trình duyệt
     const cookieStore = await cookies();
-    cookieStore.set('token', token, {
+    const cookieName = user.role === 'ADMIN' ? 'admin_token' : 'token';
+    cookieStore.set(cookieName, token, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
+      maxAge: 86400, // 1 ngày
     });
 
     return NextResponse.json({
       message: 'Đăng nhập thành công!',
       user: userData,
+      token: token, // Thêm token cho bản Mobile có thể lấy được
     });
   } catch (error) {
     console.error('Lỗi khi đăng nhập:', error);

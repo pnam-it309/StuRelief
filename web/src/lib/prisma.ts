@@ -11,11 +11,11 @@ type DatabaseHealthState = {
 }
 
 declare global {
-  var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>
+  var prismaGlobal2: undefined | ReturnType<typeof prismaClientSingleton>
   var prismaHealthGlobal: undefined | DatabaseHealthState
 }
 
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
+const prisma = globalThis.prismaGlobal2 ?? prismaClientSingleton()
 const DATABASE_HEALTH_TTL_MS = 10_000
 const prismaHealthState =
   globalThis.prismaHealthGlobal ??
@@ -27,7 +27,7 @@ const prismaHealthState =
 
 export default prisma
 
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
+if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal2 = prisma
 if (process.env.NODE_ENV !== 'production') globalThis.prismaHealthGlobal = prismaHealthState
 
 const resolveFallback = <T>(fallback: T | (() => T)): T => {

@@ -7,7 +7,7 @@ import { recordAdminActivity } from '@/lib/adminActivityLog';
 
 async function requireAdmin() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+  const token = cookieStore.get('admin_token')?.value;
   if (!token) {
     return null;
   }
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
       targetType: 'MEETING_POINT',
       targetId: meetingPoint.id,
       metadata: {
-        actionLabel: 'TẠO ĐIỂM HẸN AN TOÀN',
+        actionLabel: 'TẠO ĐIỂM HẸN GIAO DỊCH',
         details: `Đã tạo điểm hẹn "${meetingPoint.name}" cho ${campus.name} - ${campus.university.name}.`,
         severity: 'INFO',
         meetingPointName: meetingPoint.name,

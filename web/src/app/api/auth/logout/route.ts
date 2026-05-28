@@ -5,6 +5,7 @@ export async function POST() {
   try {
     const cookieStore = await cookies();
     cookieStore.delete('token');
+    cookieStore.delete('admin_token');
     
     return NextResponse.json({
       message: 'Đăng xuất thành công!',

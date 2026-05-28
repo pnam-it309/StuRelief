@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react';
+import { Suspense } from 'react';
 import DashboardLayout from '@/layouts/dashboard/DashboardLayout';
 import ProductDashboardWrapper from '@/components/products/ProductDashboardWrapper';
 import prisma, { runWithDatabase } from '@/lib/prisma';
@@ -173,16 +174,18 @@ export default async function MyPostsPage({
           </div>
         </div>
 
-        <ProductDashboardWrapper
-          initialItems={items}
-          total={total}
-          myTotal={myProductsCount}
-          page={page}
-          limit={limit}
-          search={search}
-          category={category}
-          categories={categoriesList}
-        />
+        <Suspense fallback={<div className="py-10 text-center">Đang tải...</div>}>
+          <ProductDashboardWrapper
+            initialItems={items}
+            total={total}
+            myTotal={myProductsCount}
+            page={page}
+            limit={limit}
+            search={search}
+            category={category}
+            categories={categoriesList}
+          />
+        </Suspense>
 
         {totalPages > 1 && (
           <div className="mt-12 flex items-center justify-center gap-1 md:gap-2">

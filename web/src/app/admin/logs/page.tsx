@@ -27,7 +27,7 @@ export default function SecurityLogsPage() {
           setSummary(data.summary || { critical: 0, warning: 0, info: 0 });
         }
       } catch (error) {
-        console.error('Lỗi khi fetch nhật ký an ninh:', error);
+        console.error('Lỗi khi fetch lịch sử hoạt động & lưu ý:', error);
       } finally {
         setPageLoading(false);
       }
@@ -42,19 +42,19 @@ export default function SecurityLogsPage() {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center p-6">
         <Activity className="w-12 h-12 text-rose-600 animate-pulse mb-4" />
-        <span className="text-zinc-500 font-medium text-sm">Đang tải nhật ký an ninh hệ thống...</span>
+        <span className="text-zinc-500 font-medium text-sm">Đang tải lịch sử hoạt động & lưu ý hệ thống...</span>
       </div>
     );
   }
 
   return (
-    <DashboardLayout activeItemId="audit-logs" pageTitle="Nhật Ký An Ninh & Cảnh Báo">
+    <DashboardLayout activeItemId="audit-logs" pageTitle="Lịch sử hoạt động & lưu ý">
       <div className="space-y-3">
 
 
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 p-6 sm:p-8 shadow-sm">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="text-base font-semibold">Nhật Ký An Ninh & Cảnh Báo Hệ Thống</h3>
+            <h3 className="text-base font-semibold">Lịch Sử Hoạt Động & Lưu Ý Hệ Thống</h3>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActiveFilter(activeFilter === 'CRITICAL' ? 'ALL' : 'CRITICAL')}

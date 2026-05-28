@@ -159,22 +159,39 @@ export async function GET(request: Request) {
     }
 
     const userData = await registerOrLoginGoogleUser(email, fullName, avatarUrl);
-    const token = signToken(userData, env.JWT_SECRET, 86400);
 
-    const successPath = getSuccessPath(callbackReturnTo);
+    // Kiểm tra: nếu đang login vào cổng admin nhưng tài khoản không phải ADMIN → từ chối
+    if (callbackReturnTo === '/admin' && userData.role !== 'ADMIN') {
+      return redirectWithError(origin, '/admin', 'google_not_admin');
+    }
+
+    const token = signToken(userData, env.JWT_SECRET, 86400);
+    const cookieName = userData.role === 'ADMIN' ? 'admin_token' : 'token';
+
+    // Sau khi admin login thành công → redirect vào dashboard /admin (không dùng getSuccessPath vì /admin là dashboard)
+    const successPath = callbackReturnTo === '/admin' ? '/admin' : getSuccessPath(callbackReturnTo);
     const response = NextResponse.redirect(`${origin}${successPath}?login_success=google`);
-    response.cookies.set('token', token, {
+    response.cookies.set(cookieName, token, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       path: '/',
+      maxAge: 86400, // 1 ngày
     });
     return response;
   } catch (error) {
     console.error('[Google Auth] GET error:', error);
     const { searchParams } = new URL(request.url);
     const origin = getAuthOrigin(request.url);
-    const fallbackReturnTo = normalizeReturnTo(searchParams.get('returnTo'));
+    // Ưu tiên đọc returnTo từ state đã parse; fallback mới đọc query param
+    let fallbackReturnTo: '/' | '/admin';
+    try {
+      const stateParam = searchParams.get('state');
+      const parsed = stateParam ? parseOAuthState(stateParam) : null;
+      fallbackReturnTo = parsed?.returnTo ?? normalizeReturnTo(searchParams.get('returnTo'));
+    } catch {
+      fallbackReturnTo = normalizeReturnTo(searchParams.get('returnTo'));
+    }
     if (error instanceof Error && error.message === 'GOOGLE_DB_UNAVAILABLE') {
       return redirectWithError(origin, fallbackReturnTo, 'google_database_unavailable');
     }
@@ -194,11 +211,13 @@ export async function POST(request: Request) {
     const token = signToken(userData, env.JWT_SECRET, 86400);
 
     const cookieStore = await cookies();
-    cookieStore.set('token', token, {
+    const cookieName = userData.role === 'ADMIN' ? 'admin_token' : 'token';
+    cookieStore.set(cookieName, token, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       path: '/',
+      maxAge: 86400, // 1 ngày
     });
 
     return NextResponse.json({
@@ -216,7 +235,11 @@ export async function POST(request: Request) {
 }
 
 async function registerOrLoginGoogleUser(email: string, fullName: string, avatarUrl?: string | null) {
-  const isGoogleAdmin = email.toLowerCase() === env.GOOGLE_ADMIN_EMAIL.toLowerCase();
+  // Trim dấu nháy thừa trong env (e.g. GOOGLE_ADMIN_EMAIL="tunganht26@gmail.com" với dấu nháy)
+  const adminEmail = env.GOOGLE_ADMIN_EMAIL.replace(/^"|"$/g, '').trim();
+  const isGoogleAdmin = email.toLowerCase() === adminEmail.toLowerCase();
+
+  console.log('[Google Auth] registerOrLoginGoogleUser:', { email, adminEmail, isGoogleAdmin });
 
   try {
     let user = await prisma.user.findUnique({

@@ -123,8 +123,8 @@ export default function AdminDashboardOverview() {
           {[
             { title: 'Sinh viên đã xác minh', value: stats.verifiedStudents.toLocaleString(), color: 'blue', icon: UserCheck },
             { title: 'Tổng tin đăng hiện tại', value: stats.totalProducts.toLocaleString(), color: 'indigo', icon: Package },
-            { title: 'Tranh chấp cần xử lý', value: stats.pendingDisputes.toLocaleString(), color: 'rose', icon: ShieldAlert },
-            { title: 'Điểm hẹn Safe Hub', value: String(stats.safeHubs), color: 'emerald', icon: MapPin },
+
+            { title: 'Điểm hẹn giao dịch', value: String(stats.safeHubs), color: 'emerald', icon: MapPin },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (

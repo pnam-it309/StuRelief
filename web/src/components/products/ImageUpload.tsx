@@ -8,6 +8,8 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   label?: string;
   validationError?: string | null;
+  className?: string;
+  labelClassName?: string;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -15,6 +17,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   onChange,
   label = 'Ảnh minh họa sản phẩm',
   validationError,
+  className = 'aspect-[4/3] min-h-[360px]', // Default size for backwards compatibility
+  labelClassName = 'text-base md:text-lg font-black text-zinc-950 dark:text-zinc-100 mb-3 tracking-tight',
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,13 +67,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <div className="w-full">
-      <label className="block text-base md:text-lg font-black text-zinc-950 dark:text-zinc-100 mb-3 tracking-tight">
+      <label className={`block ${labelClassName}`}>
         {label}
       </label>
 
       {value ? (
         <div
-          className={`relative group aspect-[4/3] min-h-[360px] w-full rounded-2xl overflow-hidden shadow-sm bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center border ${
+          className={`relative group ${className} w-full rounded-2xl overflow-hidden shadow-sm bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center border ${
             hasError ? 'border-rose-500 dark:border-rose-500' : 'border-zinc-200 dark:border-zinc-800'
           }`}
         >
@@ -105,7 +109,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           }}
           onDragLeave={() => setIsDragOver(false)}
           onDrop={handleDrop}
-          className={`w-full aspect-[4/3] min-h-[320px] border-2 border-dashed rounded-3xl cursor-pointer flex flex-col items-center justify-center p-6 text-center transition-all duration-300 ${
+          className={`w-full ${className} border-2 border-dashed rounded-3xl cursor-pointer flex flex-col items-center justify-center p-6 text-center transition-all duration-300 ${
             hasError
               ? 'border-rose-500 bg-rose-50/40 dark:bg-rose-950/10'
               : isDragOver

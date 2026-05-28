@@ -8,6 +8,7 @@ import Sidebar from './Sidebar';
 import DashboardFooter from './DashboardFooter';
 import type { SecurityLogItem } from '@/lib/adminInsights';
 import { APP_ROUTES } from '@shared';
+import { useTheme } from 'next-themes';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -23,6 +24,7 @@ type SessionUser = {
   role: 'STUDENT' | 'ADMIN';
   fullName: string;
   avatarUrl?: string | null;
+  status: string;
 };
 
 type DashboardNotification = {
@@ -35,7 +37,6 @@ type DashboardNotification = {
   targetPath?: string;
 };
 
-const THEME_KEY = 'sturelief.dashboard.theme';
 const READ_NOTIFICATION_IDS_KEY = 'sturelief.dashboard.notifications.readIds';
 
 export default function DashboardLayout({
@@ -48,7 +49,8 @@ export default function DashboardLayout({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [sidebarStateReady, setSidebarStateReady] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -59,14 +61,7 @@ export default function DashboardLayout({
   const notificationPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const storedTheme = window.localStorage.getItem(THEME_KEY);
-    const resolvedTheme =
-      storedTheme === 'light' || storedTheme === 'dark'
-        ? storedTheme
-        : window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light';
-    setTheme(resolvedTheme);
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -81,12 +76,6 @@ export default function DashboardLayout({
       window.localStorage.removeItem(READ_NOTIFICATION_IDS_KEY);
     }
   }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    window.localStorage.setItem(THEME_KEY, theme);
-  }, [theme]);
-
   useEffect(() => {
     try {
       const storedCollapsed = window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
@@ -342,6 +331,19 @@ export default function DashboardLayout({
     }
   }, [authLoaded, currentUser, fetchNotifications]);
 
+  useEffect(() => {
+    if (authLoaded && currentUser) {
+      if (
+        currentUser.role === 'STUDENT' &&
+        currentUser.status === 'UNVERIFIED' &&
+        !(currentUser as any).hasPendingVerification &&
+        pathname !== '/verification'
+      ) {
+        router.replace('/verification');
+      }
+    }
+  }, [authLoaded, currentUser, pathname, router]);
+
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
@@ -437,14 +439,16 @@ export default function DashboardLayout({
           <div className="flex items-center gap-3">
             {showSidebar ? (
               <>
-                <button
-                  onClick={toggleTheme}
-                  aria-pressed={theme === 'dark'}
-                  className={`inline-flex items-center justify-center p-2 rounded-xl border cursor-pointer transition-all duration-200 active:scale-95 transform-gpu ${iconColorClass}`}
-                  title={theme === 'light' ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng'}
-                >
-                  {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                </button>
+                {mounted && (
+                  <button
+                    onClick={toggleTheme}
+                    aria-pressed={theme === 'dark'}
+                    className={`inline-flex items-center justify-center p-2 rounded-xl border cursor-pointer transition-all duration-200 active:scale-95 transform-gpu ${iconColorClass}`}
+                    title={theme === 'light' ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng'}
+                  >
+                    {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                  </button>
+                )}
 
                 <div className="relative" ref={notificationPanelRef}>
                   <button

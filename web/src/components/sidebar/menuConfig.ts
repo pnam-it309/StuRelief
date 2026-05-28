@@ -10,6 +10,7 @@ import {
   Package2,
   Scale,
   UserCheck,
+  MessageSquare,
 } from 'lucide-react';
 import { APP_ROUTES, UserRole } from '@shared';
 
@@ -25,15 +26,20 @@ export interface MenuGroup {
   items: MenuItem[];
 }
 
-export const getMenuGroups = (role: UserRole): MenuGroup[] => {
+export const getMenuGroups = (role: UserRole, status?: string): MenuGroup[] => {
   const userItems = [
     { id: 'catalog', label: 'Chợ đồ cũ sinh viên', icon: Compass, path: APP_ROUTES.HOME },
     ...(role === UserRole.ADMIN
-      ? []
+      ? [
+          { id: 'messages', label: 'Tin nhắn trao đổi', icon: MessageSquare, path: '/admin/messages' },
+        ]
       : [
-          { id: 'verification', label: 'Xác thực sinh viên', icon: FileBadge, path: APP_ROUTES.VERIFICATION },
+          ...(status === 'VERIFIED' ? [] : [
+            { id: 'verification', label: 'Xác thực sinh viên', icon: FileBadge, path: APP_ROUTES.VERIFICATION },
+          ]),
+          { id: 'messages', label: 'Tin nhắn trao đổi', icon: MessageSquare, path: '/messages' },
           { id: 'my-posts', label: 'Quản lý bài đăng', icon: Package2, path: APP_ROUTES.MY_POSTS },
-          { id: 'meeting-points', label: 'Điểm hẹn an toàn', icon: Map, path: APP_ROUTES.MEETING_POINTS },
+          { id: 'meeting-points', label: 'Điểm hẹn giao dịch', icon: Map, path: APP_ROUTES.MEETING_POINTS },
         ]),
   ];
 
@@ -53,8 +59,8 @@ export const getMenuGroups = (role: UserRole): MenuGroup[] => {
         { id: 'posts', label: 'Duyệt bài đăng', icon: ClipboardCheck, path: APP_ROUTES.ADMIN.POSTS },
         { id: 'disputes', label: 'Xử lý vấn đề', icon: Scale, path: APP_ROUTES.ADMIN.DISPUTES },
         { id: 'reputations', label: 'Uy tín & đánh giá', icon: Award, path: APP_ROUTES.ADMIN.REPUTATION },
-        { id: 'audit-logs', label: 'Lịch sử hoạt động', icon: History, path: APP_ROUTES.ADMIN.LOGS },
-        { id: 'meeting-points', label: 'Điểm hẹn an toàn', icon: Map, path: APP_ROUTES.ADMIN.MEETING_POINTS },
+        { id: 'audit-logs', label: 'Lịch sử hoạt động & lưu ý', icon: History, path: APP_ROUTES.ADMIN.LOGS },
+        { id: 'meeting-points', label: 'Điểm hẹn giao dịch', icon: Map, path: APP_ROUTES.ADMIN.MEETING_POINTS },
       ],
     },
   ];

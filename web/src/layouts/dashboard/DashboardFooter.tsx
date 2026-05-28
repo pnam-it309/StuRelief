@@ -36,7 +36,7 @@ export default function DashboardFooter() {
               Xác thực sinh viên
             </Link>
             <Link className="text-sm text-zinc-600 hover:text-blue-600 dark:text-zinc-300 dark:hover:text-blue-400" href={APP_ROUTES.MEETING_POINTS}>
-              Điểm hẹn an toàn
+              Điểm hẹn giao dịch
             </Link>
             <Link className="text-sm text-zinc-600 hover:text-blue-600 dark:text-zinc-300 dark:hover:text-blue-400" href={APP_ROUTES.ADMIN.REPUTATION}>
               Uy tín & đánh giá
@@ -61,13 +61,16 @@ export default function DashboardFooter() {
             </div>
           </div>
 
-          <Link
-            href={APP_ROUTES.HOME}
+          <button
+            onClick={() => {
+              window.location.href = APP_ROUTES.HOME;
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             className="inline-flex items-center gap-2 rounded-2xl bg-[#0084ff] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#0084ff]/20 transition-all hover:bg-blue-500"
           >
             Khám phá chợ
             <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          </button>
         </div>
       </div>
 

@@ -18,7 +18,7 @@ type ProductWithRelations = Prisma.ProductGetPayload<{
     media: true;
     category: true;
   };
-}> & { sellerName?: string };
+}> & { sellerName?: string; sellerAvatarUrl?: string };
 
 export class PrismaItemRepository implements IItemRepository {
   private mapProduct(product: ProductWithRelations): Item {
@@ -30,6 +30,7 @@ export class PrismaItemRepository implements IItemRepository {
       images: product.media.filter((media) => media.type === 'IMAGE').map((media) => media.url),
       studentId: product.sellerId,
       sellerName: product.sellerName,
+      sellerAvatarUrl: product.sellerAvatarUrl,
       isQuickSell: false,
       status: product.status as ProductStatus,
       condition: product.condition,
@@ -72,13 +73,18 @@ export class PrismaItemRepository implements IItemRepository {
           const sellerIds = [...new Set(products.map((p) => p.sellerId))];
           const profiles = await prisma.studentProfile.findMany({
             where: { userId: { in: sellerIds } },
-            select: { userId: true, fullName: true },
+            select: { userId: true, fullName: true, avatarUrl: true },
           });
-          const profileMap = new Map(profiles.map((p) => [p.userId, p.fullName]));
+          const profileMap = new Map(profiles.map((p) => [p.userId, p]));
 
-          const items = products.map((product) =>
-            this.mapProduct({ ...product, sellerName: profileMap.get(product.sellerId) || undefined })
-          );
+          const items = products.map((product) => {
+            const profile = profileMap.get(product.sellerId);
+            return this.mapProduct({
+              ...product,
+              sellerName: profile?.fullName || undefined,
+              sellerAvatarUrl: profile?.avatarUrl || undefined,
+            });
+          });
 
           return { items, total };
         },
@@ -112,10 +118,14 @@ export class PrismaItemRepository implements IItemRepository {
 
       const profile = await prisma.studentProfile.findUnique({
         where: { userId: product.sellerId },
-        select: { fullName: true },
+        select: { fullName: true, avatarUrl: true },
       });
 
-      return this.mapProduct({ ...product, sellerName: profile?.fullName || undefined });
+      return this.mapProduct({
+        ...product,
+        sellerName: profile?.fullName || undefined,
+        sellerAvatarUrl: profile?.avatarUrl || undefined,
+      });
     } catch (error) {
       console.error('PrismaItemRepository.findById fallback:', error);
       return null;
@@ -189,7 +199,7 @@ export class PrismaItemRepository implements IItemRepository {
   }
 
   async update(id: string, data: UpdateItemDTO): Promise<Item> {
-    const { updated, finalProduct } = await runWithDatabase(
+    const finalProductWithSeller = await runWithDatabase(
       async () => {
         let categoryId: string | undefined;
 
@@ -244,13 +254,17 @@ export class PrismaItemRepository implements IItemRepository {
             category: true,
           },
         });
-        
+
+        if (!finalProduct) {
+          throw new Error('Product not found after update');
+        }
+
         const profile = await prisma.studentProfile.findUnique({
-          where: { userId: id },
+          where: { userId: finalProduct.sellerId },
           select: { fullName: true }
         });
 
-        return { updated, finalProduct };
+        return { ...finalProduct, sellerName: profile?.fullName || undefined } as ProductWithRelations;
       },
       () => {
         throw new Error('Database unavailable')
@@ -258,22 +272,23 @@ export class PrismaItemRepository implements IItemRepository {
       'PrismaItemRepository.update'
     );
 
-    return this.mapProduct({
-      media: finalProduct?.media || [],
-      category: finalProduct?.category || null,
-      sellerName: finalProduct?.sellerName,
-    } as any);
+    return this.mapProduct(finalProductWithSeller);
   }
 
   async delete(id: string): Promise<void> {
     await runWithDatabase(
       async () => {
-        await prisma.productMedia.deleteMany({
-          where: { productId: id },
-        });
-        await prisma.product.delete({
-          where: { id },
-        });
+        await prisma.$transaction([
+          prisma.productMedia.deleteMany({ where: { productId: id } }),
+          prisma.productAttribute.deleteMany({ where: { productId: id } }),
+          prisma.productSnapshot.deleteMany({ where: { productId: id } }),
+          prisma.priceHistory.deleteMany({ where: { productId: id } }),
+          prisma.tradeOffer.deleteMany({ where: { productId: id } }),
+          prisma.productReservation.deleteMany({ where: { productId: id } }),
+          prisma.order.deleteMany({ where: { productId: id } }),
+          prisma.wishlist.deleteMany({ where: { productId: id } }),
+          prisma.product.delete({ where: { id } }),
+        ]);
       },
       () => {
         throw new Error('Database unavailable')

@@ -16,6 +16,7 @@ import {
 import DashboardLayout from '@/layouts/dashboard/DashboardLayout';
 import { useAuthGuard } from '@/lib/hooks/useAuthGuard';
 import { APP_ROUTES, UserRole } from '@shared';
+import { showSuccessAlert, showErrorAlert, showConfirmAlert } from "@/lib/alerts";
 
 type MeetingPoint = {
   id: string;
@@ -63,11 +64,14 @@ export default function AdminMeetingPointsPage() {
   const [campusForm, setCampusForm] = useState({ name: '', address: '', universityName: '' });
   const [creatingCampus, setCreatingCampus] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
-    setFeedback({ message, type });
-    window.setTimeout(() => setFeedback(null), 3000);
+
+                if (type === 'success') {
+                  showSuccessAlert('Thành công!', message);
+                } else {
+                  showErrorAlert('Lỗi!', message);
+                }
+              
   };
 
   const fetchMeetingPoints = async () => {
@@ -91,7 +95,7 @@ export default function AdminMeetingPointsPage() {
         campusId: prev.campusId || nextCampuses[0]?.id || '',
       }));
     } catch (error) {
-      console.error('Lỗi khi tải điểm hẹn an toàn:', error);
+      console.error('Lỗi khi tải điểm hẹn giao dịch:', error);
       showFeedback('Không tải được danh sách điểm hẹn.', 'error');
     } finally {
       setLoading(false);
@@ -244,7 +248,7 @@ export default function AdminMeetingPointsPage() {
         campusId: campuses[0]?.id || '',
       });
       await fetchMeetingPoints();
-      showFeedback(editingId ? 'Đã cập nhật điểm hẹn.' : 'Đã tạo điểm hẹn an toàn mới.');
+      showFeedback(editingId ? 'Đã cập nhật điểm hẹn.' : 'Đã tạo điểm hẹn giao dịch mới.');
       setEditingId(null);
       setViewMode('list');
     } catch (error) {
@@ -259,25 +263,15 @@ export default function AdminMeetingPointsPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-6 dark:bg-zinc-950">
         <Map className="mb-4 h-12 w-12 animate-pulse text-blue-600" />
-        <span className="text-sm font-medium text-zinc-500">Đang tải điểm hẹn an toàn...</span>
+        <span className="text-sm font-medium text-zinc-500">Đang tải điểm hẹn giao dịch...</span>
       </div>
     );
   }
 
   return (
-    <DashboardLayout activeItemId="meeting-points" pageTitle="Điểm hẹn an toàn">
+    <DashboardLayout activeItemId="meeting-points" pageTitle="Điểm hẹn giao dịch">
       <div className="space-y-3">
-        {feedback && (
-          <div
-            className={`fixed right-5 top-20 z-50 flex items-center gap-2 rounded-2xl border px-5 py-3 shadow-xl md:top-24 ${
-              feedback.type === 'success'
-                ? 'border-emerald-400 bg-emerald-500 text-white'
-                : 'border-rose-400 bg-rose-500 text-white'
-            }`}
-          >
-            <span className="text-sm font-semibold">{feedback.message}</span>
-          </div>
-        )}
+        
 
         <div className="flex items-center justify-end gap-4">
 

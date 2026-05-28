@@ -15,6 +15,7 @@ import {
   Mail,
   ShieldCheck,
 } from 'lucide-react';
+import { showSuccessAlert, showErrorAlert, showConfirmAlert } from '@/lib/alerts';
 
 type FeedbackState = {
   message: string;
@@ -27,10 +28,13 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState<FeedbackState>(null);
 
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
-    setFeedback({ message, type });
+    if (type === 'success') {
+      showSuccessAlert('Thành công!', message);
+    } else {
+      showErrorAlert('Lỗi!', message);
+    }
   };
 
   const clearNonAdminSession = async () => {
@@ -43,17 +47,77 @@ export default function AdminLoginPage() {
     }
   };
 
+  // Sync current session on mount
   useEffect(() => {
-    if (!feedback) return;
-    const timer = setTimeout(() => setFeedback(null), 4000);
-    return () => clearTimeout(timer);
-  }, [feedback]);
+    let active = true;
+    const syncCurrentSession = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!active || !data.user) return;
+        if (data.user.role === 'ADMIN') {
+          sessionStorage.setItem('sturelief_user', JSON.stringify(data.user));
+          router.replace(APP_ROUTES.ADMIN.DASHBOARD);
+          return;
+        }
+        await clearNonAdminSession();
+        if (active) {
+          showFeedback('Tài khoản hiện tại không có quyền quản trị.', 'error');
+        }
+      } catch {
+        // ignore auth sync errors on the login screen
+      }
+    };
+    syncCurrentSession();
+    return () => {
+      active = false;
+    };
+  }, [router]);
 
+  // Handle login form submit
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      showFeedback('Vui lòng nhập đầy đủ email và mật khẩu quản trị.', 'error');
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Đăng nhập quản trị thất bại.');
+      }
+      if (data.user?.role !== 'ADMIN') {
+        await clearNonAdminSession();
+        throw new Error('Tài khoản này không có quyền quản trị.');
+      }
+      sessionStorage.setItem('sturelief_user', JSON.stringify(data.user));
+      showFeedback('Đăng nhập quản trị thành công. Đang chuyển hướng...', 'success');
+      setTimeout(() => {
+        router.push(APP_ROUTES.ADMIN.DASHBOARD);
+        router.refresh();
+      }, 800);
+    } catch (err: any) {
+      showFeedback(err.message || 'Không thể đăng nhập cổng quản trị.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Error handling from URL params (Google OAuth)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const err = params.get('error');
     if (err === 'google_not_configured') {
       showFeedback('Chưa cấu hình Google Client ID/Secret cho cổng quản trị.', 'error');
+    } else if (err === 'google_not_admin') {
+      showFeedback('Tài khoản Google này không có quyền truy cập cổng quản trị.', 'error');
     } else if (err === 'google_oauth_denied') {
       showFeedback('Bạn đã hủy đăng nhập Google quản trị.', 'error');
     } else if (err === 'google_oauth_state_invalid') {
@@ -67,104 +131,14 @@ export default function AdminLoginPage() {
     }
   }, []);
 
-  useEffect(() => {
-    let active = true;
-
-    const syncCurrentSession = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!active || !data.user) return;
-
-        if (data.user.role === 'ADMIN') {
-          sessionStorage.setItem('sturelief_user', JSON.stringify(data.user));
-          router.replace(APP_ROUTES.ADMIN.DASHBOARD);
-          return;
-        }
-
-        await clearNonAdminSession();
-        if (active) {
-          showFeedback('Tài khoản hiện tại không có quyền quản trị.', 'error');
-        }
-      } catch {
-        // ignore auth sync errors on the login screen
-      }
-    };
-
-    syncCurrentSession();
-
-    return () => {
-      active = false;
-    };
-  }, [router]);
-
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      showFeedback('Vui lòng nhập đầy đủ email và mật khẩu quản trị.', 'error');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Đăng nhập quản trị thất bại.');
-      }
-
-      if (data.user?.role !== 'ADMIN') {
-        await clearNonAdminSession();
-        throw new Error('Tài khoản này không có quyền quản trị.');
-      }
-
-      sessionStorage.setItem('sturelief_user', JSON.stringify(data.user));
-      showFeedback('Đăng nhập quản trị thành công. Đang chuyển hướng...', 'success');
-
-      setTimeout(() => {
-        router.push(APP_ROUTES.ADMIN.DASHBOARD);
-        router.refresh();
-      }, 800);
-    } catch (err: any) {
-      showFeedback(err.message || 'Không thể đăng nhập cổng quản trị.', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.14),_transparent_30%),linear-gradient(180deg,#f8fbff_0%,#eef6ff_100%)] p-4 sm:p-6 md:p-8">
-      {feedback && (
-        <div
-          className={`fixed right-6 top-6 z-50 flex items-center gap-3 rounded-2xl border px-6 py-4 shadow-xl backdrop-blur-md ${
-            feedback.type === 'success'
-              ? 'border-emerald-200 bg-white/92 text-emerald-700'
-              : 'border-rose-200 bg-white/92 text-rose-700'
-          }`}
-        >
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${feedback.type === 'success' ? 'bg-emerald-100' : 'bg-rose-100'}`}>
-            {feedback.type === 'success' ? <Check className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
-          </div>
-          <span className="text-sm font-semibold">{feedback.message}</span>
-        </div>
-      )}
-
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-5xl items-center justify-center">
         <section className="w-full max-w-lg rounded-[32px] border border-sky-100 bg-white/94 px-6 py-8 shadow-[0_24px_80px_rgba(59,130,246,0.12)] backdrop-blur-xl sm:px-8 md:px-10">
-          <Link
-            href={APP_ROUTES.LOGIN}
-            className="mb-8 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-500 transition hover:text-sky-700"
-          >
+          <Link href={APP_ROUTES.LOGIN} className="mb-8 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-500 transition hover:text-sky-700">
             <ArrowLeft className="h-4 w-4" />
             Về trang sinh viên
           </Link>
-
           <div className="mb-8 flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-sky-100 text-sky-700">
               <ShieldCheck className="h-8 w-8" />
@@ -174,12 +148,9 @@ export default function AdminLoginPage() {
               <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-900">Đăng nhập quản trị</h2>
             </div>
           </div>
-
           <form onSubmit={handleLoginSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
-                Email quản trị
-              </label>
+              <label className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Email quản trị</label>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400">
                   <Mail className="h-5 w-5" />
@@ -194,11 +165,8 @@ export default function AdminLoginPage() {
                 />
               </div>
             </div>
-
             <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
-                Mật khẩu
-              </label>
+              <label className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Mật khẩu</label>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400">
                   <Lock className="h-5 w-5" />
@@ -220,25 +188,18 @@ export default function AdminLoginPage() {
                 </button>
               </div>
             </div>
-
             <button
               type="submit"
               disabled={loading}
-              className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-sky-600 px-5 py-4 text-sm font-black tracking-wide text-white transition hover:bg-sky-700 active:scale-[0.99] ${
-                loading ? 'cursor-wait opacity-80' : 'cursor-pointer'
-              }`}
+              className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-sky-600 px-5 py-4 text-sm font-black tracking-wide text-white transition hover:bg-sky-700 active:scale-[0.99] ${loading ? 'cursor-wait opacity-80' : 'cursor-pointer'}`}
             >
               <LogIn className="h-4.5 w-4.5" />
               <span>{loading ? 'Đang xác thực...' : 'Vào bảng điều khiển quản trị'}</span>
             </button>
-
             <div className="relative flex items-center justify-center py-2">
               <div className="absolute inset-x-0 h-px bg-slate-200" />
-              <span className="relative bg-white px-4 text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">
-                hoặc
-              </span>
+              <span className="relative bg-white px-4 text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">hoặc</span>
             </div>
-
             <button
               type="button"
               onClick={() => {

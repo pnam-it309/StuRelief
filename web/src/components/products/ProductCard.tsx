@@ -42,35 +42,32 @@ const ProductCard: React.FC<ProductCardProps> = ({
             style={{ cursor: 'pointer' }}
           />
 
-          {product.isQuickSell && (
-            <div className="absolute top-3 left-3">
-              <span className="bg-red-500 text-white text-[10px] font-medium px-2 py-1 rounded-full uppercase tracking-wider animate-pulse">
+          {/* Bottom Left: Status & Quick Sell */}
+          <div className="absolute bottom-3 left-3 flex flex-col gap-1.5 items-start z-10">
+            {product.isQuickSell && (
+              <span className="bg-red-500/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse shadow-sm">
                 Thanh lý gấp
               </span>
-            </div>
-          )}
-
-          {product.status !== 'AVAILABLE' && (
-            <div className="absolute top-3 left-3">
-              <span className={`text-[10px] font-medium px-2 py-1 rounded-full uppercase tracking-wider ${PRODUCT_STATUS_CLASSES[product.status]}`}>
+            )}
+            {product.status !== 'AVAILABLE' && (
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm backdrop-blur-md ${PRODUCT_STATUS_CLASSES[product.status]}`}>
                 {PRODUCT_STATUS_LABELS[product.status]}
-              </span>
-            </div>
-          )}
-
-          <div className="absolute bottom-3 right-3 flex flex-col gap-1 items-end">
-            <span className="bg-white/80 dark:bg-black/60 backdrop-blur-md text-zinc-800 dark:text-zinc-200 text-xs px-2 py-1 rounded-lg">
-              {product.category}
-            </span>
-            {product.sellerName && (
-              <span className="bg-blue-600/90 backdrop-blur-md text-white text-[10px] font-medium px-2 py-1 rounded-lg">
-                Người đăng: {product.sellerName}
               </span>
             )}
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="p-4 pb-0">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-[10px] font-medium px-2 py-0.5 rounded-md">
+              {product.category}
+            </span>
+            {product.sellerName && (
+              <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-medium px-2 py-0.5 rounded-md line-clamp-1 max-w-[120px]">
+                {product.sellerName}
+              </span>
+            )}
+          </div>
           <h3 className="mb-1 line-clamp-1 text-sm font-semibold text-zinc-900 transition-colors group-hover:text-blue-600 dark:text-zinc-100">
             {product.name}
           </h3>
