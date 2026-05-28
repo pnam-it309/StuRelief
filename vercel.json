@@ -1,0 +1,8 @@
+{
+  "name": "sturelief-monorepo",
+  "framework": "nextjs",
+  "buildCommand": "npm run build -w web",
+  "devCommand": "npm run dev -w web",
+  "installCommand": "npm install",
+  "outputDirectory": "web/.next"
+}
