@@ -12,6 +12,7 @@ RUN npm ci
 COPY . .
 WORKDIR /app/web
 RUN npx prisma generate
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm run build
 
 # Chạy app siêu nhẹ
