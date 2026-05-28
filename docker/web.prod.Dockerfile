@@ -13,6 +13,8 @@ COPY . .
 WORKDIR /app/web
 RUN npx prisma generate
 ENV NODE_OPTIONS="--max-old-space-size=1024"
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV JWT_SECRET="dummy_secret_for_build_step_only_123456"
 RUN npm run build
 
 # Chạy app siêu nhẹ
