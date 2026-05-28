@@ -12,8 +12,8 @@ export async function POST(request: Request) {
     }
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'Only image files are allowed' }, { status: 400 });
+    if (!file.type.startsWith('image/') && !file.type.startsWith('audio/')) {
+      return NextResponse.json({ error: 'Only image and audio files are allowed' }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();

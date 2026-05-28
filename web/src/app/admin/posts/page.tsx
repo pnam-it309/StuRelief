@@ -7,6 +7,7 @@ import DashboardLayout from '@/layouts/dashboard/DashboardLayout';
 import { useAuthGuard } from '@/lib/hooks/useAuthGuard';
 import { APP_ROUTES, PRODUCT_STATUS_CLASSES, PRODUCT_STATUS_LABELS, UserRole } from '@shared';
 import { Item } from '@/domain/entities/Item';
+import { showSuccessAlert, showErrorAlert, showConfirmAlert } from "@/lib/alerts";
 
 type Pagination = {
   total: number;
@@ -43,12 +44,15 @@ export default function AdminPostsPage() {
   const [pagination, setPagination] = useState<Pagination>({ total: 0, page: 1, limit: 8, totalPages: 0 });
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'DRAFT' | 'AVAILABLE'>('DRAFT');
   const [selectedPost, setSelectedPost] = useState<Item | null>(null);
-  const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
-    setFeedback({ message, type });
-    setTimeout(() => setFeedback(null), 3000);
+    if (type === 'success') {
+      showSuccessAlert('Thành công!', message);
+    } else {
+      showErrorAlert('Lỗi!', message);
+    }
   };
 
   const fetchPosts = async () => {
@@ -57,7 +61,7 @@ export default function AdminPostsPage() {
       const params = new URLSearchParams({
         page: String(page),
         limit: '8',
-        status: 'DRAFT',
+        status: activeTab,
       });
 
       if (search.trim()) {
@@ -71,7 +75,7 @@ export default function AdminPostsPage() {
         setPagination(data.pagination || { total: 0, page: 1, limit: 8, totalPages: 0 });
       }
     } catch (error) {
-      console.error('Lỗi khi fetch bài đăng chờ duyệt:', error);
+      console.error('Lỗi khi fetch bài đăng:', error);
     } finally {
       setLoading(false);
     }
@@ -81,14 +85,12 @@ export default function AdminPostsPage() {
     if (currentUser) {
       fetchPosts();
     }
-  }, [currentUser, page, search]);
+  }, [currentUser, page, search, activeTab]);
 
   const handleReview = async (id: string, status: 'AVAILABLE' | 'HIDDEN') => {
-    const confirmed = window.confirm(
-      status === 'AVAILABLE'
-        ? 'Xác nhận duyệt bài đăng này?'
-        : 'Xác nhận từ chối bài đăng này?'
-    );
+    const confirmed = (await showConfirmAlert('Xác nhận', status === 'AVAILABLE'
+            ? 'Xác nhận duyệt bài đăng này?'
+            : 'Xác nhận từ chối bài đăng này?')).isConfirmed;
     if (!confirmed) return;
 
     try {
@@ -101,6 +103,7 @@ export default function AdminPostsPage() {
       if (res.ok) {
         setSelectedPost(null);
         await fetchPosts();
+        showFeedback(status === 'AVAILABLE' ? 'Đã duyệt bài đăng' : 'Đã từ chối bài đăng');
       }
     } catch (error) {
       console.error('Lỗi khi duyệt bài đăng:', error);
@@ -108,11 +111,33 @@ export default function AdminPostsPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    const confirmed = (await showConfirmAlert('Xác nhận', 'Bạn có chắc chắn muốn xóa bài đăng này không?')).isConfirmed;
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/admin/posts?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setSelectedPost(null);
+        await fetchPosts();
+        showFeedback('Đã xóa bài đăng thành công');
+      } else {
+        showFeedback('Lỗi khi xóa bài đăng', 'error');
+      }
+    } catch (error) {
+      console.error('Lỗi khi xóa bài đăng:', error);
+      showFeedback('Đã có lỗi xảy ra khi xóa bài đăng.', 'error');
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center p-6">
         <PackageCheck className="w-12 h-12 text-blue-600 animate-pulse mb-4" />
-        <span className="text-zinc-500 font-medium text-sm">Đang tải hàng chờ duyệt bài đăng...</span>
+        <span className="text-zinc-500 font-medium text-sm">Đang tải danh sách bài đăng...</span>
       </div>
     );
   }
@@ -122,38 +147,50 @@ export default function AdminPostsPage() {
   return (
     <DashboardLayout activeItemId="posts" pageTitle="Duyệt Bài Đăng">
       <div className="space-y-3">
-        {feedback && (
-          <div className={`fixed right-5 top-20 z-50 flex items-center gap-2 rounded-2xl border px-5 py-3 shadow-xl md:top-24 ${feedback.type === 'success' ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-rose-500 text-white border-rose-400'}`}>
-            <span className="text-sm font-semibold">{feedback.message}</span>
-          </div>
-        )}
-
-        <div className="flex items-center justify-end gap-4">
-
-          <div className="text-[11px] text-zinc-400 font-medium bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded-full flex items-center gap-1">
-            <PackageCheck className="w-3 h-3 text-amber-500" />
-            <span>Chờ duyệt: {pagination.total}</span>
-          </div>
-        </div>
-
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 p-6 sm:p-8 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <div>
-              <h3 className="text-base font-semibold">Bài đăng chờ admin duyệt</h3>
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base font-semibold">Danh sách bài đăng</h3>
+              </div>
+
+              <div className="relative w-full sm:w-72">
+                <Search className="w-4 h-4 absolute left-3.5 top-3 text-zinc-400" />
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên bài..."
+                  value={search}
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearch(e.target.value);
+                  }}
+                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition-colors"
+                />
+              </div>
             </div>
 
-            <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 absolute left-3.5 top-3 text-zinc-400" />
-              <input
-                type="text"
-                placeholder="Tìm theo tên bài..."
-                value={search}
-                onChange={(e) => {
-                  setPage(1);
-                  setSearch(e.target.value);
-                }}
-                className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition-colors"
-              />
+            {/* Tabs */}
+            <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2">
+              <button
+                onClick={() => { setActiveTab('DRAFT'); setPage(1); }}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[9px] ${
+                  activeTab === 'DRAFT' 
+                  ? 'text-blue-600 border-blue-600' 
+                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                }`}
+              >
+                Chờ duyệt
+              </button>
+              <button
+                onClick={() => { setActiveTab('AVAILABLE'); setPage(1); }}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[9px] ${
+                  activeTab === 'AVAILABLE' 
+                  ? 'text-blue-600 border-blue-600' 
+                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                }`}
+              >
+                Đã duyệt
+              </button>
             </div>
           </div>
 
@@ -189,44 +226,60 @@ export default function AdminPostsPage() {
                       </div>
                     </td>
                     <td className="py-4 px-4 font-medium text-zinc-500 dark:text-zinc-400">{post.category}</td>
-                    <td className="py-4 px-4 font-medium text-zinc-900 dark:text-zinc-100">{post.studentId}</td>
+                    <td className="py-4 px-4 font-medium text-zinc-900 dark:text-zinc-100">{post.sellerName || post.studentId}</td>
                     <td className="py-4 px-4">
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-medium uppercase ${PRODUCT_STATUS_CLASSES[post.status]}`}>
                         {PRODUCT_STATUS_LABELS[post.status]}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <div className="inline-flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReview(post.id, 'AVAILABLE');
-                          }}
-                          className="h-9 w-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 flex items-center justify-center transition-colors"
-                          aria-label="Duyệt"
-                          title="Duyệt"
-                        >
-                          <Check className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReview(post.id, 'HIDDEN');
-                          }}
-                          className="h-9 w-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 flex items-center justify-center transition-colors"
-                          aria-label="Từ chối"
-                          title="Từ chối"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
+                      {activeTab === 'DRAFT' ? (
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReview(post.id, 'AVAILABLE');
+                            }}
+                            className="h-9 w-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 flex items-center justify-center transition-colors"
+                            aria-label="Duyệt"
+                            title="Duyệt"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReview(post.id, 'HIDDEN');
+                            }}
+                            className="h-9 w-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 flex items-center justify-center transition-colors"
+                            aria-label="Từ chối"
+                            title="Từ chối"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(post.id);
+                            }}
+                            className="h-9 w-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 flex items-center justify-center transition-colors"
+                            aria-label="Xóa bài đăng"
+                            title="Xóa bài đăng"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
                 {posts.length === 0 && (
                   <tr>
                     <td colSpan={5} className="py-12 text-center text-xs text-zinc-400">
-                      Không có bài đăng nào đang chờ duyệt.
+                      Không có bài đăng nào trong mục này.
                     </td>
                   </tr>
                 )}
@@ -252,16 +305,14 @@ export default function AdminPostsPage() {
                     </span>
                   );
                 }
-
-                const isActive = item === page;
                 return (
                   <button
                     key={item}
-                    onClick={() => setPage(item)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-xl font-medium text-sm transition-all ${
-                      isActive
-                        ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-md shadow-blue-500/20 scale-105'
-                        : 'border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-800 dark:hover:text-zinc-200'
+                    onClick={() => setPage(item as number)}
+                    className={`w-10 h-10 flex items-center justify-center rounded-xl font-semibold text-sm transition-all ${
+                      page === item
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20 border-transparent'
+                        : 'border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300'
                     }`}
                   >
                     {item}
@@ -280,7 +331,8 @@ export default function AdminPostsPage() {
           )}
         </div>
       </div>
-
+      
+      {/* REVIEW MODAL POPUP */}
       {selectedPost && (
         <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 py-6 bg-black/60 backdrop-blur-sm">
           <div className="relative bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-up max-h-[90vh] overflow-y-auto">
@@ -312,7 +364,7 @@ export default function AdminPostsPage() {
               <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mb-4">
                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedPost.price)}
               </p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Người đăng: {selectedPost.studentId}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Người đăng: {selectedPost.sellerName || selectedPost.studentId}</p>
               <hr className="border-zinc-200 dark:border-zinc-800 my-4" />
               <div className="mb-6">
                 <h4 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2 tracking-tight">Mô tả chi tiết</h4>
@@ -322,18 +374,29 @@ export default function AdminPostsPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleReview(selectedPost.id, 'HIDDEN')}
-                  className="py-3 border border-rose-500/20 hover:bg-rose-500/5 text-rose-500 text-xs font-semibold rounded-2xl cursor-pointer transition-colors"
-                >
-                  Từ chối
-                </button>
-                <button
-                  onClick={() => handleReview(selectedPost.id, 'AVAILABLE')}
-                  className="py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-2xl cursor-pointer transition-colors shadow-md shadow-blue-500/10"
-                >
-                  Duyệt bài
-                </button>
+                {activeTab === 'DRAFT' ? (
+                  <>
+                    <button
+                      onClick={() => handleReview(selectedPost.id, 'HIDDEN')}
+                      className="py-3 border border-rose-500/20 hover:bg-rose-500/5 text-rose-500 text-xs font-semibold rounded-2xl cursor-pointer transition-colors"
+                    >
+                      Từ chối
+                    </button>
+                    <button
+                      onClick={() => handleReview(selectedPost.id, 'AVAILABLE')}
+                      className="py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-2xl cursor-pointer transition-colors shadow-md shadow-blue-500/10"
+                    >
+                      Duyệt bài
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => handleDelete(selectedPost.id)}
+                    className="col-span-2 py-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-2xl cursor-pointer transition-colors shadow-md shadow-rose-500/10"
+                  >
+                    Xóa bài đăng
+                  </button>
+                )}
               </div>
             </div>
           </div>

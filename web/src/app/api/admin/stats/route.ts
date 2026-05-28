@@ -8,7 +8,7 @@ import { buildMonthlyActivitySeries, getMonthRange } from '@/lib/adminInsights';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get('admin_token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     const payload = verifyToken(token, env.JWT_SECRET);

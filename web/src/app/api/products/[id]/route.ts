@@ -8,6 +8,7 @@ import { verifyToken } from '@/lib/jwt';
 import { env } from '@/infrastructure/config/env';
 import prisma from '@/lib/prisma';
 import { createUserNotification, notifyAdmins } from '@/lib/notifications';
+import { getAuthToken } from '@/lib/authHelper';
 
 const itemRepository = new PrismaItemRepository();
 
@@ -22,7 +23,7 @@ export async function GET(
 
     if (item.status !== 'AVAILABLE') {
       const cookieStore = await cookies();
-      const token = cookieStore.get('token')?.value;
+      const token = getAuthToken(cookieStore, request);
       const payload = token ? verifyToken(token, env.JWT_SECRET) : null;
 
       if (!payload || (payload.role !== 'ADMIN' && payload.id !== item.studentId)) {
@@ -49,7 +50,7 @@ export async function PUT(
 
     // 1. Kiểm tra phân quyền Server-side bằng JWT Cookie
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = getAuthToken(cookieStore, request);
     if (token) {
       const payload = verifyToken(token, env.JWT_SECRET);
       if (payload) {
@@ -85,10 +86,13 @@ export async function PUT(
         });
         
         // Admins get notified
-        const user = await prisma.user.findUnique({ where: { id: payload.id } });
+        const user = await prisma.user.findUnique({
+          where: { id: payload.id },
+          include: { profile: true },
+        });
         await notifyAdmins({
           title: 'Bài đăng được cập nhật',
-          content: `${user?.fullName || 'Một sinh viên'} vừa cập nhật bài đăng "${updatedItem.name}" và đang chờ duyệt lại.`,
+          content: `${user?.profile?.fullName || 'Một sinh viên'} vừa cập nhật bài đăng "${updatedItem.name}" và đang chờ duyệt lại.`,
           type: 'SYSTEM',
           link: `/admin/posts`,
         });
@@ -113,7 +117,7 @@ export async function DELETE(
 
     // 1. Kiểm tra phân quyền Server-side bằng JWT Cookie
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = getAuthToken(cookieStore, request);
     if (token) {
       const payload = verifyToken(token, env.JWT_SECRET);
       if (payload) {

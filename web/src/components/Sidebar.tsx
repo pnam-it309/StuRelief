@@ -23,7 +23,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; role: UserRole; fullName: string; avatarUrl?: string | null } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; role: UserRole; fullName: string; avatarUrl?: string | null; status?: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Sync user status on mount
@@ -61,7 +61,7 @@ export default function Sidebar({
     }
   };
 
-  const menuItems = getMenuGroups(activeRole).flatMap((group) => group.items);
+  const menuItems = getMenuGroups(activeRole, currentUser?.status).flatMap((group) => group.items);
 
   return (
     <aside

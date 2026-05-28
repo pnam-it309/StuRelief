@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { PrismaItemRepository } from '@/infrastructure/persistence/PrismaItemRepository';
 import { GetItemsUseCase } from '@/use-cases/items/GetItemsUseCase';
 import { PostItemUseCase } from '@/use-cases/items/PostItemUseCase';
 import { createUserNotification, notifyAdmins } from '@/lib/notifications';
+import { getAuthToken } from '@/lib/authHelper';
+import { verifyToken } from '@/lib/jwt';
+import { env } from '@/infrastructure/config/env';
 import prisma from '@/lib/prisma';
 
 const itemRepository = new PrismaItemRepository();
@@ -37,10 +41,30 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const useCase = new PostItemUseCase(itemRepository);
-    const newItem = await useCase.execute({ ...body, status: 'DRAFT' });
 
-    if (body.studentId) {
+    // Kiểm tra role từ JWT token để quyết định status bài đăng
+    const cookieStore = await cookies();
+    const token = getAuthToken(cookieStore, request);
+    const payload = token ? verifyToken(token, env.JWT_SECRET) : null;
+    const isAdmin = payload?.role === 'ADMIN';
+
+    // Admin đăng bài → duyệt ngay (AVAILABLE), sinh viên → chờ duyệt (DRAFT)
+    const initialStatus = isAdmin ? 'AVAILABLE' : 'DRAFT';
+
+    const useCase = new PostItemUseCase(itemRepository);
+    const newItem = await useCase.execute({ ...body, status: initialStatus });
+
+    if (isAdmin) {
+      // Admin không cần thông báo chờ duyệt
+      await createUserNotification({
+        userId: body.studentId || payload!.id,
+        title: 'Bài đăng đã được đăng',
+        content: `Bài đăng "${newItem.name}" của bạn đã được đăng và hiển thị ngay lập tức.`,
+        type: 'SYSTEM',
+        link: `/products/${newItem.id}`,
+      });
+    } else if (body.studentId) {
+      // Sinh viên → thông báo chờ duyệt + thông báo admin
       await createUserNotification({
         userId: body.studentId,
         title: 'Bài đăng đã được gửi',

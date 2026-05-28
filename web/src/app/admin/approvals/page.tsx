@@ -13,6 +13,7 @@ import {
 import DashboardLayout from '@/layouts/dashboard/DashboardLayout';
 import { useAuthGuard } from '@/lib/hooks/useAuthGuard';
 import { UserRole, VerificationStatus, VERIFICATION_STATUS_LABELS, VERIFICATION_STATUS_CLASSES, APP_ROUTES } from '@shared';
+import { showSuccessAlert, showErrorAlert, showConfirmAlert } from "@/lib/alerts";
 
 interface VerificationRequest {
   id: string;
@@ -23,20 +24,25 @@ interface VerificationRequest {
   cardImage: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   date: string;
+  dateOfBirth?: string;
+  hometown?: string;
 }
 
 export default function ApprovalsPage() {
   const router = useRouter();
   const { currentUser, loading: authLoading } = useAuthGuard(UserRole.ADMIN);
   const [verifySearch, setVerifySearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
   const [selectedVerification, setSelectedVerification] = useState<VerificationRequest | null>(null);
   const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
-    setFeedback({ message, type });
-    setTimeout(() => setFeedback(null), 3000);
+    if (type === 'success') {
+      showSuccessAlert('Thành công!', message);
+    } else {
+      showErrorAlert('Lỗi!', message);
+    }
   };
 
   const fetchVerifications = async () => {
@@ -62,11 +68,9 @@ export default function ApprovalsPage() {
 
   // Handle Verify Actions (Approve/Reject)
   const handleVerifyRequest = async (id: string, action: 'APPROVED' | 'REJECTED') => {
-    const confirmed = window.confirm(
-      action === 'APPROVED'
-        ? 'Xác nhận duyệt yêu cầu xác thực này?'
-        : 'Xác nhận từ chối yêu cầu xác thực này?'
-    );
+    const confirmed = (await showConfirmAlert('Xác nhận', action === 'APPROVED'
+            ? 'Xác nhận duyệt yêu cầu xác thực này?'
+            : 'Xác nhận từ chối yêu cầu xác thực này?')).isConfirmed;
     if (!confirmed) return;
 
     try {
@@ -88,9 +92,10 @@ export default function ApprovalsPage() {
   };
 
   const filteredVerifications = verifications.filter(v => 
-    v.fullName.toLowerCase().includes(verifySearch.toLowerCase()) ||
+    v.status === activeTab &&
+    (v.fullName.toLowerCase().includes(verifySearch.toLowerCase()) ||
     v.mssv.includes(verifySearch) ||
-    v.email.toLowerCase().includes(verifySearch.toLowerCase())
+    v.email.toLowerCase().includes(verifySearch.toLowerCase()))
   );
 
   if (authLoading || loading) {
@@ -103,37 +108,61 @@ export default function ApprovalsPage() {
   }
 
   return (
-    <DashboardLayout activeItemId="approvals" pageTitle="Xác Thực Thẻ Sinh Viên">
+    <DashboardLayout activeItemId="approvals" pageTitle="Xác Thực Sinh Viên">
       <div className="space-y-3">
-        {feedback && (
-          <div className={`fixed right-5 top-20 z-50 flex items-center gap-2 rounded-2xl border px-5 py-3 shadow-xl md:top-24 ${
-            feedback.type === 'success'
-              ? 'bg-emerald-500 text-white border-emerald-400'
-              : 'bg-rose-500 text-white border-rose-400'
-          }`}>
-            <span className="text-sm font-semibold">{feedback.message}</span>
-          </div>
-        )}
-        
-
-
         {/* Content Box */}
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 p-6 sm:p-8 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <div>
-              <h3 className="text-base font-semibold">Xét duyệt thẻ sinh viên & Email trường</h3>
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base font-semibold">Danh sách xác thực sinh viên</h3>
+              </div>
+              
+              {/* Search Box */}
+              <div className="relative w-full sm:w-72">
+                <Search className="w-4 h-4 absolute left-3.5 top-3 text-zinc-400" />
+                <input
+                  type="text"
+                  placeholder="Tìm tên, MSSV, Email..."
+                  value={verifySearch}
+                  onChange={(e) => setVerifySearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition-colors"
+                />
+              </div>
             </div>
-            
-            {/* Search Box */}
-            <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 absolute left-3.5 top-3 text-zinc-400" />
-              <input
-                type="text"
-                placeholder="Tìm tên, MSSV, Email..."
-                value={verifySearch}
-                onChange={(e) => setVerifySearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition-colors"
-              />
+
+            {/* Tabs */}
+            <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2">
+              <button
+                onClick={() => setActiveTab('PENDING')}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[9px] ${
+                  activeTab === 'PENDING' 
+                  ? 'text-blue-600 border-blue-600' 
+                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                }`}
+              >
+                Chờ duyệt
+              </button>
+              <button
+                onClick={() => setActiveTab('APPROVED')}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[9px] ${
+                  activeTab === 'APPROVED' 
+                  ? 'text-blue-600 border-blue-600' 
+                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                }`}
+              >
+                Đã duyệt
+              </button>
+              <button
+                onClick={() => setActiveTab('REJECTED')}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[9px] ${
+                  activeTab === 'REJECTED' 
+                  ? 'text-blue-600 border-blue-600' 
+                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                }`}
+              >
+                Đã từ chối
+              </button>
             </div>
           </div>
 
@@ -178,7 +207,7 @@ export default function ApprovalsPage() {
                 {filteredVerifications.length === 0 && (
                   <tr>
                     <td colSpan={5} className="py-12 text-center text-xs text-zinc-400">
-                      Không tìm thấy yêu cầu xác thực nào phù hợp.
+                      Không tìm thấy yêu cầu xác thực nào phù hợp trong mục này.
                     </td>
                   </tr>
                 )}
@@ -191,9 +220,9 @@ export default function ApprovalsPage() {
       {/* STUDENT CARD VERIFICATION MODAL POPUP */}
       {selectedVerification && (
         <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 py-6 bg-black/60 backdrop-blur-sm">
-          <div className="relative bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-up max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-up max-h-[90vh] overflow-y-auto flex flex-col">
             
-            <div className="p-6 border-b border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between">
+            <div className="p-6 border-b border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between sticky top-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md z-10">
               <div className="flex flex-col">
                 <h3 className="text-base font-semibold text-zinc-900 dark:text-white">Chi tiết Thẻ Sinh Viên</h3>
               </div>
@@ -223,6 +252,14 @@ export default function ApprovalsPage() {
                   <p className="font-medium text-zinc-950 dark:text-white mt-0.5">{selectedVerification.fullName}</p>
                 </div>
                 <div className="bg-zinc-50 dark:bg-zinc-800/40 p-3.5 rounded-xl">
+                  <span className="text-[10px] text-zinc-950 dark:text-zinc-100 font-medium tracking-tight">Ngày sinh</span>
+                  <p className="font-medium text-zinc-950 dark:text-white mt-0.5">
+                    {selectedVerification.dateOfBirth 
+                      ? new Date(selectedVerification.dateOfBirth).toLocaleDateString('vi-VN') 
+                      : 'Không có'}
+                  </p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-zinc-800/40 p-3.5 rounded-xl">
                   <span className="text-[10px] text-zinc-950 dark:text-zinc-100 font-medium tracking-tight">Mã số sinh viên (MSSV)</span>
                   <p className="font-medium text-zinc-950 dark:text-white mt-0.5">{selectedVerification.mssv}</p>
                 </div>
@@ -233,6 +270,10 @@ export default function ApprovalsPage() {
                 <div className="bg-zinc-50 dark:bg-zinc-800/40 p-3.5 rounded-xl">
                   <span className="text-[10px] text-zinc-950 dark:text-zinc-100 font-medium tracking-tight">Cơ sở (Campus)</span>
                   <p className="font-medium text-zinc-950 dark:text-white mt-0.5">{selectedVerification.campus}</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-zinc-800/40 p-3.5 rounded-xl">
+                  <span className="text-[10px] text-zinc-950 dark:text-zinc-100 font-medium tracking-tight">Quê quán</span>
+                  <p className="font-medium text-zinc-950 dark:text-white mt-0.5">{selectedVerification.hometown || 'Không có'}</p>
                 </div>
               </div>
 
@@ -250,6 +291,16 @@ export default function ApprovalsPage() {
                     className="py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-2xl cursor-pointer transition-colors shadow-md shadow-blue-500/10"
                   >
                     Duyệt hoạt động
+                  </button>
+                </div>
+              )}
+              {selectedVerification.status !== 'PENDING' && (
+                <div className="flex justify-end border-t border-zinc-100 dark:border-zinc-800/60 pt-6">
+                  <button
+                    onClick={() => setSelectedVerification(null)}
+                    className="px-6 py-2.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-sm font-semibold rounded-xl transition-colors"
+                  >
+                    Đóng cửa sổ
                   </button>
                 </div>
               )}

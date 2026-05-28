@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePathname, useRouter } from 'next/navigation';
-import { AlertCircle, Check, MessageSquare, PackageOpen, X, XCircle } from 'lucide-react';
+import { AlertCircle, Check, Loader2, MessageSquare, PackageOpen, Star, ThumbsUp, X, XCircle, Camera } from 'lucide-react';
 import { Item } from '@/domain/entities/Item';
 import { PRODUCT_STATUS_CLASSES, PRODUCT_STATUS_LABELS } from '@shared';
 import ProductCard from './ProductCard';
 import SearchAndFilter from './SearchAndFilter';
 import ImageUpload from './ImageUpload';
 import { aiImageUrl } from '@/lib/aiImage';
+import { showSuccessAlert, showErrorAlert, showConfirmAlert } from "@/lib/alerts";
 
 interface ProductDashboardWrapperProps {
   initialItems: Item[];
@@ -61,7 +62,14 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
   const [formDescription, setFormDescription] = useState('');
   const [formImage, setFormImage] = useState('');
   const [formCondition, setFormCondition] = useState('USED_GOOD');
-  const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  
+  // Review states
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewHoverRating, setReviewHoverRating] = useState(0);
+  const [reviewBody, setReviewBody] = useState('');
+  const [reviewImageUrl, setReviewImageUrl] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -104,8 +112,37 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
   }, []);
 
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
-    setFeedback({ message, type });
-    setTimeout(() => setFeedback(null), 3000);
+    if (type === 'success') {
+      showSuccessAlert('Thành công!', message);
+    } else {
+      showErrorAlert('Lỗi!', message);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!selectedProduct || submittingReview) return;
+    setSubmittingReview(true);
+    try {
+      const res = await fetch(`/api/products/${selectedProduct.id}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: reviewRating, body: reviewBody, imageUrl: reviewImageUrl }),
+      });
+      if (res.ok) {
+        showFeedback('Cảm ơn bạn đã đánh giá! Người bán được +10 điểm uy tín.');
+        setIsReviewOpen(false);
+        setReviewBody('');
+        setReviewImageUrl('');
+        setReviewRating(5);
+      } else {
+        const data = await res.json();
+        showFeedback(data.error || 'Lỗi khi gửi đánh giá!', 'error');
+      }
+    } catch {
+      showFeedback('Không thể gửi đánh giá, vui lòng thử lại!', 'error');
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   const displayedItems = activeTab === 'all'
@@ -142,7 +179,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
       return;
     }
 
-    const confirmed = window.confirm('Xác nhận đăng tin bán sản phẩm này?');
+    const confirmed = (await showConfirmAlert('Xác nhận', 'Xác nhận đăng tin bán sản phẩm này?')).isConfirmed;
     if (!confirmed) return;
 
     try {
@@ -166,7 +203,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
       setItems((prev) => [newProduct, ...prev.filter((item) => item.id !== newProduct.id)]);
       setMyTotalCount((prev) => prev + 1);
       setIsCreateOpen(false);
-      showFeedback('Đăng tin thành công, bài đang chờ admin duyệt!');
+      showFeedback(newProduct.status === 'AVAILABLE' ? 'Đăng tin thành công!' : 'Đăng tin thành công, bài đang chờ admin duyệt!');
       router.refresh();
     } catch {
       showFeedback('Đã có lỗi xảy ra khi thêm sản phẩm!', 'error');
@@ -193,7 +230,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
       return;
     }
 
-    const confirmed = window.confirm('Xác nhận cập nhật tin rao này?');
+    const confirmed = (await showConfirmAlert('Xác nhận', 'Xác nhận cập nhật tin rao này?')).isConfirmed;
     if (!confirmed) return;
 
     try {
@@ -235,7 +272,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
   };
 
   const handleOpenDelete = async (product: Item) => {
-    const confirmed = window.confirm(`Xác nhận xóa sản phẩm "${product.name}"?`);
+    const confirmed = (await showConfirmAlert('Xác nhận', `Xác nhận xóa sản phẩm "${product.name}"?`)).isConfirmed;
     if (!confirmed) return;
 
     try {
@@ -255,10 +292,10 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
         setMyTotalCount((prev) => Math.max(0, prev - 1));
       }
 
-      window.alert('Xóa sản phẩm thành công!');
+      showFeedback('Xóa sản phẩm thành công!');
       router.refresh();
     } catch {
-      window.alert('Đã có lỗi xảy ra khi xóa sản phẩm!');
+      showFeedback('Đã có lỗi xảy ra khi xóa sản phẩm!', 'error');
     }
   };
 
@@ -269,19 +306,6 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
 
   return (
     <div className="w-full">
-      {feedback && (
-        <div
-          className={`fixed top-20 right-5 z-50 px-6 py-4 rounded-2xl shadow-xl backdrop-blur-lg flex items-center gap-3 border transition-all duration-300 animate-slide-in md:top-24 ${
-            feedback.type === 'success'
-              ? 'bg-emerald-500/90 text-white border-emerald-400'
-              : 'bg-rose-500/90 text-white border-rose-400'
-          }`}
-        >
-          <span>{feedback.type === 'success' ? <Check className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}</span>
-          <span className="font-semibold text-sm">{feedback.message}</span>
-        </div>
-      )}
-
       <div className="flex border-b border-zinc-200 dark:border-zinc-800 mb-6">
         <button
           onClick={() => { if (pathname !== '/') router.push('/'); }}
@@ -352,7 +376,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
 
       {mounted && isDetailOpen && selectedProduct && createPortal(
         <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 py-6 bg-black/60 backdrop-blur-sm transition-all">
-          <div className="relative bg-white dark:bg-zinc-900 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-up max-h-[90vh] overflow-y-auto md:grid md:grid-cols-[1.08fr_0.92fr]">
+          <div className="relative bg-white dark:bg-zinc-900 w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-up max-h-[90vh] overflow-y-auto md:grid md:grid-cols-[1.2fr_0.8fr]">
             <div className="relative min-h-64 md:min-h-[560px] w-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center p-6 md:p-8">
               <img
                 src={selectedProduct.images[0] || aiImageUrl(`realistic AI student marketplace product photo of ${selectedProduct.name}`, { width: 600, height: 600, seed: selectedProduct.id })}
@@ -382,33 +406,70 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
               <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mb-6">
                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedProduct.price)}
               </p>
-              <hr className="border-zinc-200 dark:border-zinc-800 my-4" />
+              {/* Thông tin chủ bài đăng */}
+              <div className="flex items-center gap-3 mb-5 p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-700/60">
+                <div className="relative flex-shrink-0">
+                  {selectedProduct.sellerAvatarUrl ? (
+                    <img
+                      src={selectedProduct.sellerAvatarUrl}
+                      alt={selectedProduct.sellerName || 'Người bán'}
+                      referrerPolicy="no-referrer"
+                      className="w-11 h-11 rounded-full object-cover ring-2 ring-blue-100 dark:ring-blue-900/40"
+                    />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-base ring-2 ring-blue-100 dark:ring-blue-900/40">
+                      {(selectedProduct.sellerName || 'N')[0].toUpperCase()}
+                    </div>
+                  )}
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-green-400 border-2 border-white dark:border-zinc-800" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium uppercase tracking-wide mb-0.5">Người đăng bán</p>
+                  <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-2 break-words leading-tight pr-2">
+                    {selectedProduct.sellerName || 'Sinh viên ẩn danh'}
+                  </p>
+                </div>
+                {currentUser && currentUser.id !== selectedProduct.studentId && (
+                  <button
+                    onClick={() => {
+                      setIsDetailOpen(false);
+                      router.push(`/messages?productId=${selectedProduct.id}&sellerId=${selectedProduct.studentId}`);
+                    }}
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl transition-all active:scale-95"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    Nhắn tin
+                  </button>
+                )}
+              </div>
               <div className="mb-6">
                 <h4 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2 tracking-tight">Mô tả chi tiết</h4>
-                <p className="text-zinc-600 dark:text-zinc-300 text-sm whitespace-pre-line leading-relaxed">
-                  {selectedProduct.description || 'Chủ bài đăng không cung cấp mô tả thêm cho sản phẩm này.'}
-                </p>
+                <div className="max-h-48 overflow-y-auto pr-2">
+                  <p className="text-zinc-600 dark:text-zinc-300 text-sm whitespace-pre-line leading-relaxed">
+                    {selectedProduct.description || 'Chủ bài đăng không cung cấp mô tả thêm cho sản phẩm này.'}
+                  </p>
+                </div>
               </div>
               <div className="flex flex-col gap-3 md:pt-2">
-                <button
-                  onClick={() => {
-                    setIsDetailOpen(false);
-                    showFeedback('Đã sao chép thông tin liên hệ của sinh viên!');
-                  }}
-                  className="flex-1 py-3 bg-zinc-950 dark:bg-zinc-100 hover:bg-zinc-850 dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-medium rounded-2xl text-sm transition-all flex items-center justify-center gap-2"
-                >
-                  <MessageSquare className="w-5 h-5" />
-                  Nhắn tin trao đổi ngay
-                </button>
-                <button
-                  onClick={() => setIsDetailOpen(false)}
-                  className="py-3 px-6 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-medium rounded-2xl text-sm transition-all"
-                >
-                  <span className="mr-2 inline-flex align-middle">
-                    <XCircle className="h-4 w-4" />
-                  </span>
-                  Đóng lại
-                </button>
+
+
+                {/* Nút Đánh giá - chỉ hiện với người mua, ẩn với chủ bài */}
+                {currentUser && currentUser.id !== selectedProduct.studentId && (
+                  <button
+                    onClick={() => {
+                      if (!currentUser) {
+                        showFeedback('Bạn cần đăng nhập để đánh giá!', 'error');
+                        return;
+                      }
+                      setIsReviewOpen(true);
+                    }}
+                    className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-2xl text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                  >
+                    <Star className="w-4 h-4 fill-white" />
+                    Đánh giá bài đăng
+                  </button>
+                )}
+
               </div>
             </div>
           </div>
@@ -604,6 +665,90 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
           </div>
         </div>
       , document.body)}
+
+      {/* REVIEWS MODAL */}
+      {mounted && isReviewOpen && selectedProduct && createPortal(
+        <div className="fixed inset-0 z-[60] overflow-y-auto flex items-center justify-center p-4 py-6 bg-black/60 backdrop-blur-sm transition-all">
+          <div className="relative bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-scale-up p-6 md:p-8">
+            <button
+              onClick={() => setIsReviewOpen(false)}
+              className="absolute top-4 right-4 p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 rounded-full transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-[#1877F2] dark:text-[#1877F2] rounded-full flex items-center justify-center mx-auto mb-4">
+                <ThumbsUp className="w-8 h-8 fill-current" />
+              </div>
+              <h3 className="text-2xl font-bold text-zinc-900 dark:text-white">Đánh giá người bán</h3>
+              <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-sm">
+                Đánh giá uy tín cho sinh viên <strong>{selectedProduct.sellerName}</strong>
+              </p>
+            </div>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-zinc-900 dark:text-zinc-100 text-center mb-3">Số sao đánh giá</label>
+                <div className="flex items-center justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setReviewRating(star)}
+                      onMouseEnter={() => setReviewHoverRating(star)}
+                      onMouseLeave={() => setReviewHoverRating(0)}
+                      className="p-1 transition-all hover:scale-110 active:scale-95"
+                    >
+                      <Star
+                        className={`w-10 h-10 ${
+                          (reviewHoverRating || reviewRating) >= star
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'fill-zinc-200 text-zinc-200 dark:fill-zinc-700 dark:text-zinc-700'
+                        } transition-colors`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2">Nhận xét (không bắt buộc)</label>
+                <textarea
+                  value={reviewBody}
+                  onChange={(e) => setReviewBody(e.target.value)}
+                  placeholder="Người bán thân thiện, giao dịch nhanh chóng..."
+                  className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm outline-none focus:border-amber-500 dark:focus:border-amber-500 transition-all resize-none h-28"
+                ></textarea>
+              </div>
+              
+              <div className="mt-4 mb-4">
+                <ImageUpload
+                  value={reviewImageUrl}
+                  onChange={setReviewImageUrl}
+                  label="Ảnh đánh giá (tùy chọn)"
+                  className="aspect-video min-h-[160px]"
+                  labelClassName="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2"
+                />
+              </div>
+              
+              <button
+                onClick={handleSubmitReview}
+                disabled={submittingReview}
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl text-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+              >
+                {submittingReview ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Đang gửi đánh giá...
+                  </>
+                ) : (
+                  'Gửi đánh giá'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      , document.body)}
+
     </div>
   );
 };

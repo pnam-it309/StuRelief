@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { APP_ROUTES } from '@shared';
+import { Suspense } from 'react';
 import { 
   HeartHandshake, 
   Mail, 
@@ -16,7 +17,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -101,8 +102,7 @@ export default function LoginPage() {
       
       // Redirect home and force page refresh to sync header
       setTimeout(() => {
-        router.push('/');
-        router.refresh();
+        window.location.href = '/';
       }, 1000);
     } catch (err: unknown) {
       showFeedback(getErrorMessage(err, 'Tài khoản hoặc mật khẩu không chính xác!'), 'error');
@@ -216,15 +216,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Heading and description */}
-          <div className="relative z-10">
-            <h1 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
-              Kết Nối & Chia Sẻ <br />Đồ Cũ Sinh Viên
-            </h1>
-            <p className="text-sm opacity-80 mt-4 leading-relaxed max-w-sm">
-              Nền tảng hàng đầu dành riêng cho sinh viên để trao đổi giáo trình, quần áo, xe cộ, đồ công nghệ uy tín và tiết kiệm.
-            </p>
-          </div>
         </div>
 
         {/* Right Panel (Interactive Login / Register Form) */}
@@ -242,11 +233,6 @@ export default function LoginPage() {
             <h2 className="text-2xl font-black text-slate-800 dark:text-white">
               {isRegister ? 'Tạo Tài Khoản Mới!' : 'Chào Mừng Trở Lại!'}
             </h2>
-            <p className="text-sm text-slate-500 dark:text-zinc-400 mt-2">
-              {isRegister 
-                ? 'Hãy đăng ký để tham gia cộng đồng mua bán sinh viên.' 
-                : 'Đăng nhập để kết nối với hàng nghìn sinh viên uy tín.'}
-            </p>
           </div>
 
           {/* Dynamic Form Form */}
@@ -265,7 +251,7 @@ export default function LoginPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Nguyen Van A"
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:text-white transition-all"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50/80 hover:bg-white dark:bg-zinc-800/60 dark:hover:bg-zinc-800/90 border border-slate-200 hover:border-blue-300 dark:border-zinc-700 dark:hover:border-blue-500/50 rounded-2xl text-sm focus:outline-none focus:ring-[4px] focus:ring-blue-500/20 focus:border-blue-500 dark:focus:ring-blue-500/20 dark:text-white transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-md focus:-translate-y-0.5"
                     required
                   />
                 </div>
@@ -284,7 +270,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@university.edu.vn"
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:text-white transition-all"
+                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 hover:bg-slate-50 dark:bg-zinc-800/50 dark:hover:bg-zinc-800/80 border border-slate-200 hover:border-slate-300 dark:border-zinc-800 dark:hover:border-zinc-700 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 dark:focus:ring-blue-500/20 dark:text-white transition-all duration-300 shadow-sm"
                   required
                 />
               </div>
@@ -303,7 +289,7 @@ export default function LoginPage() {
                     value={studentCode}
                     onChange={(e) => setStudentCode(e.target.value)}
                     placeholder="MSSV123456"
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:text-white transition-all"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50/80 hover:bg-white dark:bg-zinc-800/60 dark:hover:bg-zinc-800/90 border border-slate-200 hover:border-blue-300 dark:border-zinc-700 dark:hover:border-blue-500/50 rounded-2xl text-sm focus:outline-none focus:ring-[4px] focus:ring-blue-500/20 focus:border-blue-500 dark:focus:ring-blue-500/20 dark:text-white transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-md focus:-translate-y-0.5"
                   />
                 </div>
               </div>
@@ -332,7 +318,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-3.5 bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:text-white transition-all"
+                  className="w-full pl-12 pr-12 py-3.5 bg-slate-50/80 hover:bg-white dark:bg-zinc-800/60 dark:hover:bg-zinc-800/90 border border-slate-200 hover:border-blue-300 dark:border-zinc-700 dark:hover:border-blue-500/50 rounded-2xl text-sm focus:outline-none focus:ring-[4px] focus:ring-blue-500/20 focus:border-blue-500 dark:focus:ring-blue-500/20 dark:text-white transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-md focus:-translate-y-0.5"
                   required
                 />
                 <button
@@ -349,7 +335,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-4 rounded-2xl font-medium text-sm tracking-wide shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`w-full py-4 rounded-2xl font-bold text-[15px] tracking-wide shadow-[0_8px_30px_rgb(59,130,246,0.4)] hover:shadow-[0_8px_30px_rgb(59,130,246,0.6)] hover:-translate-y-1 text-white bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
                 loading ? 'opacity-80 cursor-wait' : ''
               }`}
             >
@@ -366,18 +352,14 @@ export default function LoginPage() {
               )}
             </button>
 
-            {/* Alternate Google Sign-in Mockup (as in attached image) */}
-            <div className="relative flex items-center justify-center my-6">
-              <div className="absolute inset-x-0 h-px bg-slate-150 dark:bg-zinc-800" />
-              <span className="relative px-4 text-xs font-semibold text-slate-400 dark:text-zinc-500 bg-white dark:bg-zinc-900 uppercase">Hoặc đăng nhập nhanh</span>
-            </div>
+
 
             <button
               type="button"
               onClick={() => {
                 window.location.href = '/api/auth/google?returnTo=/';
               }}
-              className="w-full py-3.5 rounded-2xl font-medium text-xs tracking-wide bg-white dark:bg-zinc-800/30 hover:bg-slate-50 dark:hover:bg-zinc-800/60 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 transition-all flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer"
+              className="w-full py-3.5 rounded-2xl font-medium text-sm tracking-wide bg-white dark:bg-zinc-800/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 border border-slate-200 hover:border-slate-300 dark:border-zinc-700 dark:hover:border-zinc-600 text-slate-700 dark:text-zinc-200 transition-all duration-300 flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5"
             >
               {/* Google Colored Icon */}
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -416,5 +398,13 @@ export default function LoginPage() {
 
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 dark:bg-zinc-950 flex items-center justify-center p-4">Đang tải...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

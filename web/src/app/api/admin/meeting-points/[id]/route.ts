@@ -6,7 +6,7 @@ import { env } from '@/infrastructure/config/env';
 
 async function requireAdmin() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+  const token = cookieStore.get('admin_token')?.value;
   if (!token) return null;
   const payload = verifyToken(token, env.JWT_SECRET);
   if (!payload || payload.role !== 'ADMIN') return null;

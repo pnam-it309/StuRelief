@@ -59,6 +59,8 @@ model StudentProfile {
   university   University @relation(fields: [universityId], references: [id])
   campusId     String?
   campus       Campus?    @relation(fields: [campusId], references: [id])
+  dateOfBirth  DateTime?
+  hometown     String?
   bio          String?
   avatarUrl    String?
 }

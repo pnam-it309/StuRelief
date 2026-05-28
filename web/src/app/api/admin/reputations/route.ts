@@ -7,7 +7,7 @@ import { env } from '@/infrastructure/config/env';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get('admin_token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     const payload = verifyToken(token, env.JWT_SECRET);
@@ -93,6 +93,7 @@ export async function GET() {
           orderId: review.orderId,
           rating: review.rating,
           body: review.body || '',
+          imageUrl: review.imageUrl,
           reviewerName: reviewer?.profile?.fullName || 'Người mua',
           reviewerAvatar: reviewer?.profile?.avatarUrl,
           reviewedName: reviewed?.profile?.fullName || 'Người bán',
@@ -117,7 +118,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get('admin_token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     const payload = verifyToken(token, env.JWT_SECRET);

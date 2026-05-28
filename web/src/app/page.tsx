@@ -46,6 +46,12 @@ export default async function Home({
   const currentUser = token ? verifyToken(token, env.JWT_SECRET) : null;
   const currentUserId = currentUser?.id || 'guest';
 
+  // Redirect newly registered students to verification page
+  if (currentUser && currentUser.status === 'PENDING') {
+    const { redirect } = await import('next/navigation');
+    redirect('/verification');
+  }
+
   let items: Item[] = [];
   let total = 0;
   let categoriesList: string[] = [];

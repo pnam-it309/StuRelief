@@ -13,7 +13,7 @@ const itemRepository = new PrismaItemRepository();
 export async function GET(request: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get('admin_token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const payload = verifyToken(token, env.JWT_SECRET);
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get('admin_token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const payload = verifyToken(token, env.JWT_SECRET);
@@ -104,8 +104,90 @@ export async function PUT(request: Request) {
     }
 
     const updated = await itemRepository.findById(id);
-    return NextResponse.json(updated);
+    return NextResponse.json({ message: 'Success' });
   } catch (error) {
+    console.error('Lỗi khi duyệt bài đăng:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('admin_token')?.value;
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const payload = verifyToken(token, env.JWT_SECRET);
+    if (!payload || payload.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing required field: id' }, { status: 400 });
+    }
+
+    const product = await prisma.product.findUnique({ where: { id } });
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    const orders = await prisma.order.findMany({ where: { productId: id }, select: { id: true } });
+    const orderIds = orders.map(o => o.id);
+
+    // Delete all child relations of Orders first to avoid Foreign Key violations
+    if (orderIds.length > 0) {
+      const disputes = await prisma.disputeCase.findMany({ where: { orderId: { in: orderIds } }, select: { id: true } });
+      const disputeIds = disputes.map(d => d.id);
+      
+      await prisma.$transaction([
+        prisma.disputeEvidence.deleteMany({ where: { disputeCaseId: { in: disputeIds } } }),
+        prisma.disputeCase.deleteMany({ where: { orderId: { in: orderIds } } }),
+        prisma.reviewAttribute.deleteMany({ where: { review: { orderId: { in: orderIds } } } }),
+        prisma.review.deleteMany({ where: { orderId: { in: orderIds } } }),
+        prisma.orderStatusLog.deleteMany({ where: { orderId: { in: orderIds } } }),
+        prisma.orderEvidence.deleteMany({ where: { orderId: { in: orderIds } } }),
+        prisma.escrowSession.deleteMany({ where: { orderId: { in: orderIds } } }),
+      ]);
+    }
+
+    await prisma.$transaction([
+      prisma.productMedia.deleteMany({ where: { productId: id } }),
+      prisma.productAttribute.deleteMany({ where: { productId: id } }),
+      prisma.productSnapshot.deleteMany({ where: { productId: id } }),
+      prisma.priceHistory.deleteMany({ where: { productId: id } }),
+      prisma.tradeOffer.deleteMany({ where: { productId: id } }),
+      prisma.productReservation.deleteMany({ where: { productId: id } }),
+      prisma.order.deleteMany({ where: { productId: id } }),
+      prisma.wishlist.deleteMany({ where: { productId: id } }),
+      prisma.product.delete({ where: { id } }),
+    ]);
+
+    await recordAdminActivity({
+      userId: payload.id,
+      action: 'DELETE_POST',
+      targetType: 'PRODUCT',
+      targetId: id,
+      metadata: {
+        actionLabel: 'XÓA BÀI VIẾT',
+        details: `Đã xóa bài đăng "${product.name}".`,
+        severity: 'WARNING',
+        productName: product.name,
+      },
+    });
+
+    if (product.sellerId) {
+      await createUserNotification({
+        userId: product.sellerId,
+        title: 'Bài đăng của bạn đã bị xóa',
+        content: `Bài đăng "${product.name}" của bạn đã bị xóa bởi quản trị viên do vi phạm quy định hoặc không phù hợp.`,
+        type: 'SYSTEM',
+      });
+    }
+
+    return NextResponse.json({ message: 'Deleted successfully' });
+  } catch (error) {
+    console.error('Lỗi khi xóa bài đăng:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
