@@ -24,6 +24,7 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV PORT 3000
+ENV HOSTNAME="0.0.0.0"
 
 # Copy các file cần thiết từ builder
 COPY --from=builder /app/web/public ./web/public
