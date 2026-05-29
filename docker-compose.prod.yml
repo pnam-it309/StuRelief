@@ -25,6 +25,9 @@ services:
     build:
       context: .
       dockerfile: docker/web.prod.Dockerfile
+      args:
+        - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     container_name: sturelief-web-prod
     restart: always
     depends_on:
@@ -38,6 +41,9 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:8080/api
     ports:
       - "8080:3000"
+    volumes:
+      - /home/ubuntu/uploads:/app/web/public/uploads
 
 volumes:
   postgres_prod_data:
+  sturelief_uploads:

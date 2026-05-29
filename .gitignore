@@ -41,3 +41,4 @@ web/prisma/migrations/
 !web/prisma/schema/
 !web/prisma/schema.prisma
 !web/prisma/seed.ts
+.vercel

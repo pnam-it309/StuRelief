@@ -33,10 +33,10 @@ const _env = envSchema.safeParse({
   GOOGLE_ADMIN_EMAIL: process.env.GOOGLE_ADMIN_EMAIL,
 });
 
-if (!_env.success) {
+if (!_env.success && process.env.SKIP_ENV_VALIDATION !== 'true') {
   console.error(' Lỗi cấu hình môi trường Web:');
   console.error(_env.error.flatten().fieldErrors);
   throw new Error('Ứng dụng Web không thể khởi động do cấu hình sai tệp web/.env');
 }
 
-export const env = _env.data;
+export const env = _env.success ? _env.data : ({} as any);

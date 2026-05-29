@@ -9,5 +9,6 @@ export function aiImageUrl(prompt: string, options: AiImageOptions = {}) {
   const height = options.height ?? 600;
   const seed = options.seed ?? prompt;
 
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${encodeURIComponent(String(seed))}&nologo=true`;
+  // Thay thế AI generator (quá chậm) bằng Picsum (nhanh, ảnh random đẹp theo seed)
+  return `https://picsum.photos/seed/${encodeURIComponent(String(seed))}/${width}/${height}`;
 }

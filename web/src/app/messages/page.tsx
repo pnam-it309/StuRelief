@@ -295,7 +295,10 @@ function MessagesContent() {
 
       if (res.ok) {
         const data = await res.json();
-        setMessages(prev => [...prev, data.message]);
+        setMessages(prev => {
+          if (prev.some(m => m.id === data.message.id)) return prev;
+          return [...prev, data.message];
+        });
         setConversations(prev =>
           prev.map(c =>
             c.id === activeConvId ? { ...c, lastMessage: data.message, lastMessageAt: new Date().toISOString() } : c
@@ -409,7 +412,10 @@ function MessagesContent() {
 
       if (res.ok) {
         const data = await res.json();
-        setMessages((prev) => [...prev, data.message]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === data.message.id)) return prev;
+          return [...prev, data.message];
+        });
         setConversations((prev) =>
           prev.map((c) =>
             c.id === activeConvId ? { ...c, lastMessage: data.message, lastMessageAt: new Date().toISOString() } : c
@@ -463,7 +469,10 @@ function MessagesContent() {
 
       if (res.ok) {
         const data = await res.json();
-        setMessages(prev => [...prev, data.message]);
+        setMessages(prev => {
+          if (prev.some(m => m.id === data.message.id)) return prev;
+          return [...prev, data.message];
+        });
         setConversations(prev =>
           prev.map(c =>
             c.id === activeConvId ? { ...c, lastMessage: data.message, lastMessageAt: new Date().toISOString() } : c
@@ -510,7 +519,10 @@ function MessagesContent() {
 
       if (res.ok) {
         const data = await res.json();
-        setMessages((prev) => [...prev, data.message]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === data.message.id)) return prev;
+          return [...prev, data.message];
+        });
         setConversations((prev) =>
           prev.map((c) =>
             c.id === activeConvId ? { ...c, lastMessage: data.message, lastMessageAt: new Date().toISOString() } : c
