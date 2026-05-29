@@ -42,7 +42,7 @@ services:
     ports:
       - "8080:3000"
     volumes:
-      - sturelief_uploads:/app/web/public/uploads
+      - /home/ubuntu/uploads:/app/web/public/uploads
 
 volumes:
   postgres_prod_data:
