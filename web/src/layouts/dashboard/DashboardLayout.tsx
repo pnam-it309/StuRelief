@@ -325,6 +325,11 @@ export default function DashboardLayout({
   useEffect(() => {
     if (authLoaded && currentUser) {
       fetchNotifications();
+      const intervalId = setInterval(() => {
+        fetchNotifications();
+      }, 15000); // 15 seconds
+
+      return () => clearInterval(intervalId);
     } else if (authLoaded && !currentUser) {
       setNotifications([]);
       setNotificationBadge(0);

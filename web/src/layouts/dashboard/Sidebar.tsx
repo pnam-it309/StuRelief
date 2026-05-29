@@ -60,6 +60,12 @@ export default function Sidebar({ activeItem, isCollapsed = false, onToggleColla
 
     fetchUser();
     fetchBadges();
+
+    const intervalId = setInterval(() => {
+      fetchBadges();
+    }, 15000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const activeRole = currentUser?.role || UserRole.STUDENT;
