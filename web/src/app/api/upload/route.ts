@@ -20,9 +20,10 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes);
 
     // Save to the public/uploads directory
-    const uploadDir = join(process.cwd(), 'public', 'uploads');
-    
-    // Ensure directory exists
+    const isProd = process.env.NODE_ENV === 'production';
+    // In Docker (standalone monorepo), cwd is /app but public is in /app/web/public
+    const baseDir = isProd ? join(process.cwd(), 'web') : process.cwd();
+    const uploadDir = join(baseDir, 'public', 'uploads');
     await mkdir(uploadDir, { recursive: true });
 
     // Generate a unique safe filename
