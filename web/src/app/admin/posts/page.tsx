@@ -44,7 +44,7 @@ export default function AdminPostsPage() {
   const [pagination, setPagination] = useState<Pagination>({ total: 0, page: 1, limit: 8, totalPages: 0 });
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'DRAFT' | 'AVAILABLE'>('DRAFT');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'DRAFT' | 'AVAILABLE' | 'SOLD' | 'HIDDEN'>('ALL');
   const [selectedPost, setSelectedPost] = useState<Item | null>(null);
 
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
@@ -61,8 +61,10 @@ export default function AdminPostsPage() {
       const params = new URLSearchParams({
         page: String(page),
         limit: '8',
-        status: activeTab,
       });
+      if (activeTab !== 'ALL') {
+        params.set('status', activeTab);
+      }
 
       if (search.trim()) {
         params.set('search', search.trim());
@@ -90,7 +92,7 @@ export default function AdminPostsPage() {
   const handleReview = async (id: string, status: 'AVAILABLE' | 'HIDDEN') => {
     const confirmed = (await showConfirmAlert('Xác nhận', status === 'AVAILABLE'
             ? 'Xác nhận duyệt bài đăng này?'
-            : 'Xác nhận từ chối bài đăng này?')).isConfirmed;
+            : 'Xác nhận từ chối/ẩn bài đăng này?')).isConfirmed;
     if (!confirmed) return;
 
     try {
@@ -103,7 +105,7 @@ export default function AdminPostsPage() {
       if (res.ok) {
         setSelectedPost(null);
         await fetchPosts();
-        showFeedback(status === 'AVAILABLE' ? 'Đã duyệt bài đăng' : 'Đã từ chối bài đăng');
+        showFeedback(status === 'AVAILABLE' ? 'Đã duyệt bài đăng' : 'Đã ẩn bài đăng');
       }
     } catch (error) {
       console.error('Lỗi khi duyệt bài đăng:', error);
@@ -144,8 +146,16 @@ export default function AdminPostsPage() {
 
   const pageNumbers = buildPageNumbers(pagination.page, pagination.totalPages);
 
+  const TABS = [
+    { id: 'ALL', label: 'Tất cả' },
+    { id: 'DRAFT', label: 'Chờ duyệt' },
+    { id: 'AVAILABLE', label: 'Đang hiển thị' },
+    { id: 'SOLD', label: 'Đã bán' },
+    { id: 'HIDDEN', label: 'Bị ẩn/Từ chối' },
+  ] as const;
+
   return (
-    <DashboardLayout activeItemId="posts" pageTitle="Duyệt Bài Đăng">
+    <DashboardLayout activeItemId="posts" pageTitle="Quản lý bài đăng">
       <div className="space-y-3">
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/60 p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col gap-4 mb-4">
@@ -170,27 +180,20 @@ export default function AdminPostsPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2">
-              <button
-                onClick={() => { setActiveTab('DRAFT'); setPage(1); }}
-                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[9px] ${
-                  activeTab === 'DRAFT' 
-                  ? 'text-blue-600 border-blue-600' 
-                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
-                }`}
-              >
-                Chờ duyệt
-              </button>
-              <button
-                onClick={() => { setActiveTab('AVAILABLE'); setPage(1); }}
-                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[9px] ${
-                  activeTab === 'AVAILABLE' 
-                  ? 'text-blue-600 border-blue-600' 
-                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
-                }`}
-              >
-                Đã duyệt
-              </button>
+            <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2 overflow-x-auto scrollbar-none">
+              {TABS.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => { setActiveTab(tab.id); setPage(1); }}
+                  className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[9px] whitespace-nowrap ${
+                    activeTab === tab.id 
+                    ? 'text-blue-600 border-blue-600' 
+                    : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -233,7 +236,7 @@ export default function AdminPostsPage() {
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right">
-                      {activeTab === 'DRAFT' ? (
+                      {post.status === 'DRAFT' ? (
                         <div className="inline-flex items-center gap-2">
                           <button
                             onClick={(e) => {
@@ -254,6 +257,31 @@ export default function AdminPostsPage() {
                             className="h-9 w-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 flex items-center justify-center transition-colors"
                             aria-label="Từ chối"
                             title="Từ chối"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : post.status === 'AVAILABLE' ? (
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReview(post.id, 'HIDDEN');
+                            }}
+                            className="h-9 w-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 flex items-center justify-center transition-colors"
+                            aria-label="Ẩn bài đăng"
+                            title="Ẩn bài đăng"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(post.id);
+                            }}
+                            className="h-9 w-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 flex items-center justify-center transition-colors"
+                            aria-label="Xóa bài đăng"
+                            title="Xóa bài đăng"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -374,7 +402,7 @@ export default function AdminPostsPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {activeTab === 'DRAFT' ? (
+                {selectedPost.status === 'DRAFT' ? (
                   <>
                     <button
                       onClick={() => handleReview(selectedPost.id, 'HIDDEN')}
@@ -389,12 +417,27 @@ export default function AdminPostsPage() {
                       Duyệt bài
                     </button>
                   </>
+                ) : selectedPost.status === 'AVAILABLE' ? (
+                  <>
+                    <button
+                      onClick={() => handleReview(selectedPost.id, 'HIDDEN')}
+                      className="py-3 border border-rose-500/20 hover:bg-rose-500/5 text-rose-500 text-xs font-semibold rounded-2xl cursor-pointer transition-colors"
+                    >
+                      Ẩn bài đăng
+                    </button>
+                    <button
+                      onClick={() => handleDelete(selectedPost.id)}
+                      className="py-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-2xl cursor-pointer transition-colors shadow-md shadow-rose-500/10"
+                    >
+                      Xóa bài đăng
+                    </button>
+                  </>
                 ) : (
                   <button
                     onClick={() => handleDelete(selectedPost.id)}
                     className="col-span-2 py-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-2xl cursor-pointer transition-colors shadow-md shadow-rose-500/10"
                   >
-                    Xóa bài đăng
+                    Xóa bài đăng vĩnh viễn
                   </button>
                 )}
               </div>

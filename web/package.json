@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0",
+    "dev": "cross-env NODE_OPTIONS=\"--dns-result-order=ipv4first\" next dev -H 0.0.0.0",
     "build": "npx prisma generate && next build",
     "start": "next start -H 0.0.0.0",
     "lint": "eslint",
@@ -27,6 +27,7 @@
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.0",
     "babel-plugin-react-compiler": "1.0.0",
+    "cross-env": "^10.1.0",
     "dotenv": "^16.4.7",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",

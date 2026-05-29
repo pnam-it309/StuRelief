@@ -16,6 +16,10 @@ ENV NODE_OPTIONS="--max-old-space-size=1024"
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 ENV JWT_SECRET="dummy_secret_for_build_step_only_123456"
 ENV SKIP_ENV_VALIDATION="true"
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN npm run build
 
 # Chạy app siêu nhẹ
