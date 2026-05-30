@@ -117,9 +117,9 @@ export default function AdminDashboardOverview() {
   const approvedPath = buildLinePath(approvedPoints);
 
   return (
-    <DashboardLayout activeItemId="dashboard" pageTitle="Bảng Điều Khiển Tổng Quan">
+    <DashboardLayout activeItemId="dashboard" pageTitle="Dashboard">
       <div className="space-y-5 animate-page-transition">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { title: 'Sinh viên đã xác minh', value: stats.verifiedStudents.toLocaleString(), color: 'blue', icon: UserCheck },
             { title: 'Tổng tin đăng hiện tại', value: stats.totalProducts.toLocaleString(), color: 'indigo', icon: Package },

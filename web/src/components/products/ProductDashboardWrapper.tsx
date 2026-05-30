@@ -369,7 +369,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
             onDetail={handleOpenDetail}
             onEdit={handleOpenEdit}
             onDelete={handleOpenDelete}
-            showActions={pathname === '/my-posts' && (product.studentId === currentUser?.id || currentUser?.role === 'ADMIN')}
+            showActions={product.studentId === currentUser?.id || currentUser?.role === 'ADMIN'}
           />
         ))}
       </div>

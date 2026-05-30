@@ -54,7 +54,7 @@ export const getMenuGroups = (role: UserRole, status?: string): MenuGroup[] => {
     {
       title: 'Hệ thống quản trị',
       items: [
-        { id: 'dashboard', label: 'Dashboard tổng quan', icon: Activity, path: APP_ROUTES.ADMIN.DASHBOARD },
+        { id: 'dashboard', label: 'Dashboard', icon: Activity, path: APP_ROUTES.ADMIN.DASHBOARD },
         { id: 'approvals', label: 'Xác thực thẻ SV', icon: UserCheck, path: APP_ROUTES.ADMIN.APPROVALS },
         { id: 'posts', label: 'Duyệt bài đăng', icon: ClipboardCheck, path: APP_ROUTES.ADMIN.POSTS },
         { id: 'disputes', label: 'Xử lý vấn đề', icon: Scale, path: APP_ROUTES.ADMIN.DISPUTES },
