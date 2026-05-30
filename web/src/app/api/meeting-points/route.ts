@@ -47,9 +47,6 @@ export async function GET(request: Request) {
         : profile?.universityId
           ? { campus: { universityId: profile.universityId } }
           : {}),
-      orders: {
-        some: {}
-      }
     };
 
     const meetingPoints = await prisma.meetingPoint.findMany({
