@@ -9,7 +9,7 @@ export const universities = [
     id: 'UEH',
     name: 'Đại học Kinh tế TP.HCM',
     domain: 'ueh.edu.vn',
-    campuses: ['Cơ sở A', 'Cơ sở B', 'Cơ sở N', 'Cơ sở Nam Thành phố'],
+    campuses: ['Cơ sở A (Nguyễn Đình Chiểu)', 'Cơ sở B (Nguyễn Tri Phương)', 'Cơ sở N (Nam Thành phố)', 'Cơ sở V (Võ Văn Tần)'],
   },
   {
     id: 'HUST',
