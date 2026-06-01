@@ -152,7 +152,7 @@ export default function Sidebar({ activeItem, isCollapsed = false, onToggleColla
                   </span>
                   {badgeCount > 0 && (
                     <div className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-[11px] font-bold rounded-full ml-2 shrink-0 shadow-sm">
-                      {badgeCount > 99 ? '99+' : badgeCount}
+                      {badgeCount > 9 ? '9+' : badgeCount}
                     </div>
                   )}
                 </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, CheckCircle } from 'lucide-react';
 import { Item } from '@/domain/entities/Item';
 import { aiImageUrl } from '@/lib/aiImage';
 import { PRODUCT_STATUS_CLASSES, PRODUCT_STATUS_LABELS } from '@shared';
@@ -11,6 +11,7 @@ interface ProductCardProps {
   onDetail?: (product: Item) => void;
   onEdit?: (product: Item) => void;
   onDelete?: (product: Item) => void;
+  onMarkAsSold?: (product: Item) => void;
   showActions?: boolean;
 }
 
@@ -19,6 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onDetail,
   onEdit,
   onDelete,
+  onMarkAsSold,
   showActions = false,
 }) => {
   const formattedPrice = new Intl.NumberFormat('vi-VN', {
@@ -36,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <div>
         <div className="aspect-square w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 relative">
           <img
-            src={product.images[0] || aiImageUrl(`realistic AI student marketplace product photo of ${product.name}`, { width: 400, height: 400, seed: product.id })}
+            src={product.images[0] || aiImageUrl(`realistic AI student marketplace product photo of ${product.name}`, { width: 800, height: 800, seed: product.id })}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             style={{ cursor: 'pointer' }}
@@ -107,6 +109,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
             >
               <Trash2 className="h-4.5 w-4.5" />
             </button>
+            {product.status !== 'SOLD' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMarkAsSold?.(product);
+                }}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-950/50"
+                aria-label="Đã bán"
+                title="Đã bán"
+              >
+                <CheckCircle className="h-4.5 w-4.5" />
+              </button>
+            )}
           </div>
         )}
       </div>

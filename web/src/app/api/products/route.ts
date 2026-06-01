@@ -51,6 +51,17 @@ export async function POST(request: Request) {
     // Admin đăng bài → duyệt ngay (AVAILABLE), sinh viên → chờ duyệt (DRAFT)
     const initialStatus = isAdmin ? 'AVAILABLE' : 'DRAFT';
 
+    if (!isAdmin) {
+      // Fetch user from DB to check status
+      const dbUser = await prisma.user.findUnique({
+        where: { id: payload!.id },
+        select: { status: true },
+      });
+      if (!dbUser || dbUser.status !== 'VERIFIED') {
+        return NextResponse.json({ error: 'Bạn cần xác thực tài khoản sinh viên để đăng bài' }, { status: 403 });
+      }
+    }
+
     const useCase = new PostItemUseCase(itemRepository);
     const newItem = await useCase.execute({ ...body, status: initialStatus });
 
