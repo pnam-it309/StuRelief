@@ -40,14 +40,23 @@ export async function GET(request: Request) {
       },
     });
 
+    const url = new URL(request.url);
+    const pointId = url.searchParams.get('id');
+
     const profile = currentUser?.profile;
-    const where = {
-      ...(profile?.campusId
-        ? { campusId: profile.campusId }
-        : profile?.universityId
-          ? { campus: { universityId: profile.universityId } }
-          : {}),
-    };
+    
+    // Tạo mảng các điều kiện OR
+    const orConditions: any[] = [];
+    if (profile?.campusId) {
+      orConditions.push({ campusId: profile.campusId });
+    } else if (profile?.universityId) {
+      orConditions.push({ campus: { universityId: profile.universityId } });
+    }
+    if (pointId) {
+      orConditions.push({ id: pointId });
+    }
+
+    const where = orConditions.length > 0 ? { OR: orConditions } : {};
 
     const meetingPoints = await prisma.meetingPoint.findMany({
       where,
