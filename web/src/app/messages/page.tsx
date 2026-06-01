@@ -650,6 +650,11 @@ function MessagesContent() {
                               </div>
                               {msg.metadata ? (
                                 <div>
+                                  {msg.metadata.photoUrl && (
+                                    <div className="w-full h-32 mb-2 rounded-lg overflow-hidden relative">
+                                      <img src={msg.metadata.photoUrl} alt={msg.metadata.name} className="w-full h-full object-cover" />
+                                    </div>
+                                  )}
                                   <div className="font-semibold text-zinc-900 dark:text-zinc-100">{msg.metadata.name}</div>
                                   <div className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">{msg.metadata.campusName} - {msg.metadata.universityName}</div>
                                   {msg.metadata.isSafeZone && (
@@ -764,10 +769,14 @@ function MessagesContent() {
                     onClick={() => handleSendMeetingPoint(point)}
                     className="w-full text-left p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:shadow-md transition-all flex gap-3 group"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                      <MapPin className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden relative">
+                      {point.photoUrl ? (
+                        <img src={point.photoUrl} alt={point.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                      ) : (
+                        <MapPin className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+                      )}
                     </div>
-                    <div>
+                    <div className="flex-1 flex flex-col justify-center">
                       <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 mb-1">{point.name}</h4>
                       <p className="text-xs text-zinc-500 font-medium mb-1">
                         {point.campusName} - {point.universityName}
