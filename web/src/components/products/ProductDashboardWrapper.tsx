@@ -49,7 +49,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
   const [totalCount, setTotalCount] = useState(total);
   const [myTotalCount, setMyTotalCount] = useState(myTotal);
   const activeTab = pathname === '/my-posts' ? 'my' : 'all';
-  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; role: 'STUDENT' | 'ADMIN'; fullName: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; role: 'STUDENT' | 'ADMIN'; fullName: string; status: string } | null>(null);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -153,6 +153,12 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
     if (!currentUser) {
       showFeedback('Bạn cần đăng nhập để đăng tin bán sản phẩm!', 'error');
       setTimeout(() => router.push('/login'), 1500);
+      return;
+    }
+
+    if (currentUser.role !== 'ADMIN' && currentUser.status !== 'VERIFIED') {
+      showFeedback('Bạn cần xác thực sinh viên để có thể đăng bài!', 'error');
+      setTimeout(() => router.push('/verification'), 2000);
       return;
     }
 
@@ -299,6 +305,23 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
     }
   };
 
+  const handleMarkAsSold = async (product: Item) => {
+    if (confirm('Bạn có chắc chắn muốn đánh dấu sản phẩm này là đã bán?')) {
+      try {
+        const res = await fetch(`/api/products/${product.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...product, status: 'SOLD' }),
+        });
+        if (!res.ok) throw new Error();
+        showFeedback('Cập nhật trạng thái thành công!');
+        router.refresh();
+      } catch {
+        showFeedback('Đã có lỗi xảy ra!', 'error');
+      }
+    }
+  };
+
   const handleOpenDetail = (product: Item) => {
     setSelectedProduct(product);
     setIsDetailOpen(true);
@@ -369,6 +392,7 @@ const ProductDashboardWrapper: React.FC<ProductDashboardWrapperProps> = ({
             onDetail={handleOpenDetail}
             onEdit={handleOpenEdit}
             onDelete={handleOpenDelete}
+            onMarkAsSold={handleMarkAsSold}
             showActions={product.studentId === currentUser?.id || currentUser?.role === 'ADMIN'}
           />
         ))}

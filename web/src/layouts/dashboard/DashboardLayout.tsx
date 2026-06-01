@@ -360,7 +360,7 @@ export default function DashboardLayout({
   const loginHref = pathname.startsWith('/admin') ? APP_ROUTES.ADMIN.LOGIN : APP_ROUTES.LOGIN;
   const notificationLabel = useMemo(() => {
     if (!notificationBadge) return 'Thông báo';
-    return notificationBadge > 99 ? '99+' : String(notificationBadge);
+    return notificationBadge > 9 ? '9+' : String(notificationBadge);
   }, [notificationBadge]);
 
   const iconColorClass = theme === 'light'

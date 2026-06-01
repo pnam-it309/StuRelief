@@ -77,7 +77,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             hasError ? 'border-rose-500 dark:border-rose-500' : 'border-zinc-200 dark:border-zinc-800'
           }`}
         >
-          <img src={value} alt="Preview" className="w-full h-full object-cover" />
+          <img src={value} alt="Preview" className="w-full h-full object-contain" />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <button
               type="button"

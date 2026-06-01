@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, PackageCheck, Search, X } from 'lucide-react';
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, PackageCheck, Search, X, EyeOff, Trash2 } from 'lucide-react';
 import DashboardLayout from '@/layouts/dashboard/DashboardLayout';
 import { useAuthGuard } from '@/lib/hooks/useAuthGuard';
 import { APP_ROUTES, PRODUCT_STATUS_CLASSES, PRODUCT_STATUS_LABELS, UserRole } from '@shared';
@@ -272,7 +272,7 @@ export default function AdminPostsPage() {
                             aria-label="Ẩn bài đăng"
                             title="Ẩn bài đăng"
                           >
-                            <X className="w-4 h-4" />
+                            <EyeOff className="w-4 h-4" />
                           </button>
                           <button
                             onClick={(e) => {
@@ -283,7 +283,7 @@ export default function AdminPostsPage() {
                             aria-label="Xóa bài đăng"
                             title="Xóa bài đăng"
                           >
-                            <X className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       ) : (
@@ -297,7 +297,7 @@ export default function AdminPostsPage() {
                             aria-label="Xóa bài đăng"
                             title="Xóa bài đăng"
                           >
-                            <X className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       )}

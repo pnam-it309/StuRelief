@@ -65,17 +65,25 @@ export async function PUT(
           );
         }
 
-        body.status = payload.role === 'ADMIN' ? body.status ?? product?.status : 'DRAFT';
+        if (payload.role !== 'ADMIN') {
+          if (body.status === 'SOLD') {
+            body.status = 'SOLD';
+          } else {
+            body.status = 'DRAFT';
+          }
+        } else {
+          body.status = body.status ?? product?.status;
+        }
       }
     }
 
     const useCase = new UpdateItemUseCase(itemRepository);
     const updatedItem = await useCase.execute(id, body);
 
-    // Notify if student updated the post
+    // Notify if student updated the post (except when just marking as SOLD)
     if (token) {
       const payload = verifyToken(token, env.JWT_SECRET);
-      if (payload && payload.role !== 'ADMIN') {
+      if (payload && payload.role !== 'ADMIN' && updatedItem.status !== 'SOLD') {
         // Student gets notified
         await createUserNotification({
           userId: payload.id,

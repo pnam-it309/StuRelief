@@ -641,9 +641,26 @@ function MessagesContent() {
                           ) : msg.type === 'AUDIO' ? (
                             <audio src={msg.content} controls className="max-w-[200px] h-10 mt-1" />
                           ) : msg.type === 'MEETING_POINT' ? (
-                            <div className="bg-white/10 p-3 rounded-lg border border-white/20 mt-1">
-                              <div className="flex items-center gap-2 mb-2 font-bold"><MapPin className="w-4 h-4"/> Điểm hẹn</div>
-                              <div>{msg.content}</div>
+                            <div 
+                              className="bg-zinc-100 dark:bg-zinc-800/50 p-3 rounded-xl border border-zinc-200 dark:border-zinc-700/50 mt-1 cursor-pointer hover:border-blue-400 transition-all text-left"
+                              onClick={() => msg.metadata?.id && window.open(`/meeting-points?id=${msg.metadata.id}`, '_blank')}
+                            >
+                              <div className="flex items-center gap-2 mb-1.5 font-bold text-blue-600 dark:text-blue-400">
+                                <MapPin className="w-4 h-4"/> Điểm hẹn giao dịch
+                              </div>
+                              {msg.metadata ? (
+                                <div>
+                                  <div className="font-semibold text-zinc-900 dark:text-zinc-100">{msg.metadata.name}</div>
+                                  <div className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">{msg.metadata.campusName} - {msg.metadata.universityName}</div>
+                                  {msg.metadata.isSafeZone && (
+                                    <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1.5 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-full inline-block">
+                                      ✓ Khu vực an toàn
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div>{msg.content}</div>
+                              )}
                             </div>
                           ) : (
                             <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
