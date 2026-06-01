@@ -55,11 +55,23 @@ export default function MeetingPointsPage() {
     const fetchPoints = async () => {
       try {
         setPageLoading(true);
-        const res = await fetch('/api/meeting-points');
+        const searchParams = new URLSearchParams(window.location.search);
+        const pointIdParam = searchParams.get('id');
+        
+        const res = await fetch(`/api/meeting-points${pointIdParam ? `?id=${pointIdParam}` : ''}`);
         if (!res.ok) return;
         const data = await res.json();
         setPoints(Array.isArray(data.data) ? data.data : []);
         setMeta(data.meta ?? null);
+
+        // Update selected point based on URL first, then fallback to localStorage
+        if (pointIdParam) {
+          setSelectedPointId(pointIdParam);
+          window.localStorage.setItem(SELECTED_POINT_KEY, pointIdParam);
+        } else {
+          const savedId = window.localStorage.getItem(SELECTED_POINT_KEY);
+          if (savedId) setSelectedPointId(savedId);
+        }
       } catch (error) {
         console.error('Lỗi khi tải điểm hẹn giao dịch:', error);
       } finally {
@@ -68,13 +80,6 @@ export default function MeetingPointsPage() {
     };
 
     fetchPoints();
-  }, []);
-
-  useEffect(() => {
-    const savedId = window.localStorage.getItem(SELECTED_POINT_KEY);
-    if (savedId) {
-      setSelectedPointId(savedId);
-    }
   }, []);
 
   const selectedPoint = useMemo(
