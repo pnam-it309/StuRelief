@@ -45,21 +45,7 @@ export async function GET(request: Request) {
 
     const profile = currentUser?.profile;
     
-    // Tạo mảng các điều kiện OR
-    const orConditions: any[] = [];
-    if (profile?.campusId) {
-      orConditions.push({ campusId: profile.campusId });
-    } else if (profile?.universityId) {
-      orConditions.push({ campus: { universityId: profile.universityId } });
-    }
-    if (pointId) {
-      orConditions.push({ id: pointId });
-    }
-
-    const where = orConditions.length > 0 ? { OR: orConditions } : {};
-
     const meetingPoints = await prisma.meetingPoint.findMany({
-      where,
       orderBy: [{ isSafeZone: 'desc' }, { name: 'asc' }],
       include: {
         campus: {
@@ -71,12 +57,26 @@ export async function GET(request: Request) {
             longitude: true,
             university: {
               select: {
+                id: true,
                 name: true,
               },
             },
           },
         },
       },
+    });
+
+    const userCampusId = profile?.campusId;
+    const userUnivId = profile?.universityId;
+
+    meetingPoints.sort((a, b) => {
+      if (a.campusId === userCampusId && b.campusId !== userCampusId) return -1;
+      if (a.campusId !== userCampusId && b.campusId === userCampusId) return 1;
+      
+      if (a.campus.university.id === userUnivId && b.campus.university.id !== userUnivId) return -1;
+      if (a.campus.university.id !== userUnivId && b.campus.university.id === userUnivId) return 1;
+
+      return 0;
     });
 
     return NextResponse.json({
@@ -94,7 +94,7 @@ export async function GET(request: Request) {
         universityName: meetingPoint.campus.university.name,
       })),
       meta: {
-        scope: profile?.campusId ? 'campus' : profile?.universityId ? 'university' : 'all',
+        scope: 'all',
         campusName: profile?.campus?.name ?? null,
         universityName: profile?.university?.name ?? null,
         totalPoints: meetingPoints.length,
