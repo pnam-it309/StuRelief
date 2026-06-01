@@ -25,6 +25,7 @@ services:
     build:
       context: .
       dockerfile: docker/web.prod.Dockerfile
+      network: host
       args:
         - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
