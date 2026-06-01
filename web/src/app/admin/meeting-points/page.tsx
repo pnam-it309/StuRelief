@@ -356,8 +356,8 @@ export default function AdminMeetingPointsPage() {
                   {uploadingPhoto && <span className="text-xs font-medium text-blue-500 flex-shrink-0 animate-pulse">Đang tải lên...</span>}
                 </div>
                 {form.photoUrl && (
-                  <div className="relative mt-2 h-24 w-24 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                    <img src={form.photoUrl} alt="Preview" className="h-full w-full object-cover" />
+                  <div className="relative mt-2 h-48 w-full overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm bg-zinc-100 dark:bg-zinc-900/50">
+                    <img src={form.photoUrl} alt="Preview" className="h-full w-full object-contain" />
                     <button 
                       type="button"
                       onClick={() => setForm(prev => ({ ...prev, photoUrl: '' }))}
