@@ -6,7 +6,10 @@ FROM base AS builder
 COPY package*.json ./
 COPY web/package*.json ./web/
 COPY shared/package*.json ./shared/
-RUN npm ci
+RUN npm config set fetch-retry-maxtimeout 600000 && \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm ci --no-audit --no-fund
 
 # Build source code
 COPY . .
